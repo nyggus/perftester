@@ -1,3 +1,4 @@
+"""Module responsible for the CLI perftest command."""
 import importlib
 import inspect
 import os
