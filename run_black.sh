@@ -1,0 +1,1 @@
+black -l 79 ./*.py ./perftest/*.py ./tests/*.py ./tests/for_testing/*.py
