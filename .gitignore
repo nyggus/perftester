@@ -68,5 +68,5 @@ venv-*/
 # VS Code
 **/.vscode/
 
-# Log file
-perftest.log
+# Log files
+**/*.log
