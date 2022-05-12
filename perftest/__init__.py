@@ -4,6 +4,7 @@ from .perftest import (
     MemoryError,
     FunctionError,
     CLIPathError,
+    PathError,
     Config,
     limits,
     config,
