@@ -2,7 +2,7 @@
 echo Grab a cup of coffee as this will take some time, my friend...
 
 cd ./perftest
-echo Docstrings in perftest.py
+echo -- Docstrings in perftest.py
 python -m doctest perftest.py
 
 cd ..
