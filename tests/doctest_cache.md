@@ -11,7 +11,7 @@ Let's check out the `@cache` decorator from `functools`. As it is available from
 ...     return n * factorial(n - 1) if n else 1
 
 >>> @lru_cache
-... def factorial_cached(n): factorial(n)
+... def factorial_cached(n): return factorial(n)
 
 ```
 
