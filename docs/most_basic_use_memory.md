@@ -52,7 +52,7 @@ If you overdo with the limit (below, we will expect 10 instead of 500) so that t
 >>> pt.memory_usage_test(sum_of_squares, pt.limits(10, None), x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function sum_of_squares:
+perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
@@ -74,7 +74,7 @@ If you overdo with the limit so that the test fails, you will see the following:
 >>> pt.memory_usage_test(sum_of_squares, pt.limits(None, 1), x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function sum_of_squares:
+perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 relative memory limit = 1
 maximum obtained relative memory usage = ...
 
@@ -95,21 +95,21 @@ Again, here're three examples of a failed test:
 >>> pt.memory_usage_test(sum_of_squares, pt.limits(10, 40), x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function sum_of_squares:
+perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
 >>> pt.memory_usage_test(sum_of_squares, pt.limits(10, 1), x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function sum_of_squares:
+perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
 >>> pt.memory_usage_test(sum_of_squares, pt.limits(10, 1), x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function sum_of_squares:
+perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 

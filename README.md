@@ -55,7 +55,7 @@ def test_performance_of_f1():
 
 ```
 
-and that's all you need! (We will discuss `perftest` functions in a minute.) If you now run `pytest` and the test passes, nothing will happen - just like with a regular `pytest` test. If the test fails, however, a `perftest.TimeError` exception will be thrown, with some additional information.
+and that's all you need! (We will discuss `perftest` functions in a minute.) If you now run `pytest` and the test passes, nothing will happen - just like with a regular `pytest` test. If the test fails, however, a `perftest.TimeTestError` exception will be thrown, with some additional information.
 
 This is the easiest way to use `perftest`. Its only drawback is that if the performance tests take much time, `pytest` will take too much time, something definitely to be avoided. You can then do some `pytest` tricks to not run `perftest` tests, and run them only when you want - or you can simply use the above-described command-line `perftest` framework for performance testing.
 
@@ -207,13 +207,13 @@ If a test fails, you will see something like this:
 
 ```shell
 # for time test
-TimeError in perftest_for_testing.perftest_f
+TimeTestError in perftest_for_testing.perftest_f
 Time test not passed for function f:
 raw_limit = 0.011
 minimum run time = 0.1007
 
 # for memory test
-MemoryError in perftest_for_testing.perftest_f2_time_and_memory
+MemoryTestError in perftest_for_testing.perftest_f2_time_and_memory
 Memory test not passed for function f2:
 memory_limit = 20
 maximum memory usage = 20.04
@@ -221,7 +221,7 @@ maximum memory usage = 20.04
 
 So, this is what you can see in this output:
 
-* Whether it's an error from a time test (`TimeError`) or a memory test (`MemoryError`).
+* Whether it's an error from a time test (`TimeTestError`) or a memory test (`MemoryTestError`).
 * `perftest_for_testing.perftest_f` provides the testing module (`perftest_for_testing`) and the perftest function (`perftest_f`).
 * `Memory test not passed for function f2:`: Here you see for which tested (not `perftest_`) function the test failed.
 * `raw_limit` and `memory_limit`: these are the raw limits you provided; these could be also `relative_limit` and `relative memory limit`, for relative tests.

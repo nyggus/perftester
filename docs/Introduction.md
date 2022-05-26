@@ -144,7 +144,7 @@ Running the above test should return nothing and throw nothing. Like with `pytes
 >>> pt.time_test(f, pt.limits(0, None), n=1000) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError: Time test not passed for function f:
+perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = 0
 minimum run time = ...
 
@@ -179,7 +179,7 @@ And now let's run the same test, but with a smaller `n` (to save time in `doctes
 >>> pt.time_test(f2, pt.limits(None, 9), n=10) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError: Time test not passed for function f2:
+perftest.perftest.TimeTestError: Time test not passed for function f2:
 relative_limit = 9
 minimum time ratio = ...
 
@@ -281,7 +281,7 @@ Like with `time_test`, you can also use relative testing:
 >>> pt.memory_usage_test(f, pt.limits(None, 2), n=10_000_000) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function f:
+perftest.perftest.MemoryTestError: Memory test not passed for function f:
 relative memory limit = 2
 maximum obtained relative memory usage = ...
 

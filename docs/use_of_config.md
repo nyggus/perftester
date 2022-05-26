@@ -175,7 +175,7 @@ The `.digits_for_printing` controls the way `pp` rounds numbers, but also the wa
 Using the default values, you could for instance get the following exception:
 
 ```python
-perftest.perftest.MemoryError: Memory test not passed for function f:
+perftest.perftest.MemoryTestError: Memory test not passed for function f:
 relative memory limit = 2.0
 maximum obtained relative memory usage = 3.321
 ```
@@ -183,7 +183,7 @@ maximum obtained relative memory usage = 3.321
 but with `pt.config.digits_for_printing = 7`, you would get this:
 
 ```python
-perftest.perftest.MemoryError: Memory test not passed for function f:
+perftest.perftest.MemoryTestError: Memory test not passed for function f:
 relative memory limit = 2.0
 maximum obtained relative memory usage = 3.321411
 ```
