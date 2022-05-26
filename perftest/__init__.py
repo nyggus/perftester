@@ -1,5 +1,5 @@
 from .perftest import (
-    ArgumentError,
+    IncorrectArgumentError,
     TimeTestError,
     MemoryTestError,
     FunctionError,
