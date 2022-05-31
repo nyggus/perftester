@@ -30,7 +30,7 @@ perftest.perftest.TimeTestError
 >>> import time
 >>> def f(): time.sleep(.1)
 >>> pt.config.set(f, "time", number=1, repeat=1)
->>> pt.time_test(f, (.001, None)) #doctest: +ELLIPSIS
+>>> pt.time_test(f, .001, None) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function f:
@@ -38,7 +38,7 @@ raw_limit = ...
 minimum run time = ...
 
 >>> pt.config.full_traceback()
->>> pt.time_test(f, (.001, None)) #doctest: +ELLIPSIS
+>>> pt.time_test(f, .001, None) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function f:

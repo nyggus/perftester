@@ -16,27 +16,27 @@ pt.config.set(f2, "time", repeat=10, number=10_000)
 
 
 def perftest_f():
-    pt.time_test(f, pt.limits(0.011, None))
+    pt.time_test(f, 0.011, None)
 
 
 def perftest_f_2():
-    pt.time_test(f, pt.limits(0.011, None))
+    pt.time_test(f, 0.011, None)
 
 
 def perftest_f3():
-    pt.time_test(f, pt.limits(0.11, None))
+    pt.time_test(f, 0.11, None)
 
 
 def perftest_f2():
-    pt.time_test(f2, pt.limits(0.011, None))
+    pt.time_test(f2, 0.011, None)
 
 
 def perftest_f2_2():
-    pt.time_test(f2, pt.limits(0.011, None))
+    pt.time_test(f2, 0.011, None)
 
 
 def perftest_f2_3():
-    pt.time_test(f2, pt.limits(0.11, None))
+    pt.time_test(f2, 0.11, None)
 
 
 # Above where single tests: one test per perftest_ function.
@@ -46,9 +46,9 @@ def perftest_f2_3():
 
 
 def perftest_f2_time_and_memory():
-    pt.time_test(f2, pt.limits(0.11, None))
-    pt.memory_usage_test(f2, pt.limits(50, None))
+    pt.time_test(f2, 0.11, None)
+    pt.memory_usage_test(f2, 50, None)
 
     # these two tests would fail, but only the first one will be run
-    pt.memory_usage_test(f2, pt.limits(2, None))
-    pt.memory_usage_test(f2, pt.limits(1, None))
+    pt.memory_usage_test(f2, 2, None)
+    pt.memory_usage_test(f2, 1, None)

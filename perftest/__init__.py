@@ -6,7 +6,6 @@ from .perftest import (
     CLIPathError,
     LogFilePathError,
     Config,
-    limits,
     config,
     memory_usage_benchmark,
     memory_usage_test,

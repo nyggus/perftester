@@ -181,24 +181,25 @@ class Config:
 
         sys.tracebacklimit = None
 
-    def reload(self, which="both"):
-        """Reload built-in benchmarks.
+    def reload_time(self):
+        """Reload built-in time benchmarks.
 
         This is done so that a new relative test is run against a built-in
         benchmark that has just been ran, not some time ago.
-
-        Although the method enables you to reload both time and memory
-        benchmarks, the class never reloads memory benchmarks, as this is
-        not needed.
-
-        Args:
-            which (str): which benchmarks should be re-run? Can be "memory",
-                "time" or "both". Defaults to "both".
         """
-        if which in ("time", "both"):
-            self._benchmark_time()
-        if which in ("memory", "both"):
-            self._benchmark_memory()
+        self._benchmark_time()
+
+    def reload_memory(self):
+        """Reload built-in memory benchmarks.
+
+        This is done so that a new relative test is run against a built-in
+        benchmark that has just been ran, not some time ago.
+        
+        WARNING: This method is NOT used in normal circumstances because memory
+        usage checks do not change over time, so there is no need to update them.
+        You need to use this method only when you change the benchmark function.
+        """
+        self._benchmark_memory()
 
     def get_setting(self, func, which, item):
         """Get setting (number or repeat) for a function.
@@ -248,8 +249,13 @@ class Config:
         return self.settings.get(func, self.defaults).get(which).get(item)
 
     def benchmark_function(self):
-        """In-built function for benchmarking."""
-        return [i ** 2 for i in (1, 100, 1000)]
+        """In-built function for benchmarking.
+        
+        It's basically an empty function that does nothing, so it's cost
+        (time and memory) represent the cost of calling a function. Anything
+        more, thus, results from whatever the function is doing.
+        """
+        pass
 
     def _benchmark_time(self):
         """Run timeit.repeat for the in-built benchmark function.
@@ -275,13 +281,13 @@ class Config:
         """Run memory_profiler.memory_usage for the in-built benchmark function.
 
         Returns:
-            float: the minimum memory usage over time
+            float: the minimum maximum memory usage over time across all runs.
         """
         memory_results = [
             memory_usage((self.benchmark_function, (), {}))
             for _ in range(self.defaults["memory"]["repeat"])
         ]
-        self.memory_benchmark = min(min(r) for r in memory_results)
+        self.memory_benchmark = min(max(r) for r in memory_results)
 
     def set_defaults(self, which, number=None, repeat=None):
         """Change the default settings.
@@ -655,6 +661,7 @@ def memory_usage_benchmark(func, *args, **kwargs):
     
     _add_func_to_config(func)
     
+    
     try:
         memory_results = [
             memory_usage((func, args, kwargs))
@@ -670,7 +677,7 @@ def memory_usage_benchmark(func, *args, **kwargs):
     overall_mean = mean(memory_results_mean)
     # We take the min of the max values
     overall_max = min(memory_results_max)
-
+    
     relative_results = copy.deepcopy(memory_results)
     for i, result in enumerate(relative_results):
         for j, r in enumerate(result):
@@ -740,7 +747,7 @@ def time_benchmark(func, *args, **kwargs):
     min_result = min(results)
 
     # Reload built-in benchmarks
-    config.reload("time")
+    config.reload_time()
 
     return {
         "min": min_result,
