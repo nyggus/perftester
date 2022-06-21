@@ -1,5 +1,81 @@
 # `perftest`: Lightweight performance testing of Python functions
 
+## Pre-introduction: TL;DR
+
+At the most basic level, using `perftest` is simple. It offers you two functions for benchmarking (one for execution time and one for memory), and two functions for performance testing (likewise).
+
+### Benchmarking
+
+You have `time_benchmark()` and `memory_benchmark` functions for your use. So:
+
+```python
+>>> import perftest as pt
+>>> def foo(x, n): return [x] * n
+>>> _ = pt.time_benchmark(foo, x=129, n=100)
+
+```
+This will perform bechmarking using `timeit.repeat()` function, with the default configuration (`number=100_000` and `repeat=5`). If you want to change any of these, you can use arguments `Number` and `Repeat`, correspondigly:
+
+```python
+>>> _ = pt.time_benchmark(foo, x=129, n=100, Number=1000)
+>>> _ = pt.time_benchmark(foo, x=129, n=100, Repeat=2)
+>>> _ = pt.time_benchmark(foo, x=129, n=100, Number=1000, Repeat=2)
+
+```
+
+Note that these calls do not change the defaults, so you use the arguments' values on the fly, and then they are forgotten.
+
+> Some of you may wonder why the `Number` and `Repeat` arguments violate what we can call the Pythonic style, by using a capital first letter. The reason is simple: I wanted to minimize a risk of conflicts that would happen when benchmarking (or testing) a function with any of the arguments `number` or `repeat` (or both). A chance that a Python function will have a `Number` or a `Repeat` argument is rather small. If that happens, however, you can use `functools.partial()` to overcome the problem.
+
+```python
+>>> def bar(Number, Repeat): return [Number] * Repeat
+>>> from functools import partial
+>>> bar_p = partial(bar, Number=129, Repeat=100)
+>>> _ = pt.time_benchmark(bar_p, Number=100, Repeat=2)
+
+```
+
+Benchmarking RAM use is similar:
+
+```python
+>>> _ = pt.memory_usage_benchmark(foo, x=129, n=100)
+
+```
+
+It uses the `memory_profiler.memory_usage()` function, which runs the function just once to measure its memory use (almost always, there is no need to repeat it). If you, however, have good reasons to change this behavior, you can do so using the `Repeat` argument:
+
+You can learn more in the detailed description of the package below.
+
+### Testing
+
+The API of `perftest` tests is very similar to benchmarks, the only difference being limits you need to provide. You can determine those limits using the above benchmark functions. Here are examples of several performance tests using `perftest`:
+
+```python
+# A raw test
+>>> pt.time_test(foo, raw_limit=7.e-07, x=129, n=100)
+
+# A relative test
+>>> pt.time_test(foo, relative_limit=7, x=129, n=100)
+
+# A raw test
+>>> pt.memory_usage_test(foo, raw_limit=18, x=129, n=100)
+
+# A relative test
+>>> pt.memory_usage_test(foo, relative_limit=1.01, x=129, n=100)
+
+```
+
+You can, certainly, use `Repeat` and `Number`:
+
+```python
+>>> pt.time_test(foo, relative_limit=7, x=129, n=100, Repeat=3, Number=1000)
+
+```
+
+
+## Introduction
+
+
 `perftest` is a lightweight package for simple performance testing in Python. Here, performance refers to execution time and memory usage, so performance testing means testing if a function performs quickly enough and does not use too much RAM. In addition, the module offers you simple functions for straightforward benchmarking, in terms of both execution time and memory.
 
 Under the hood, `perftest` is a wrapper around two functions from other modules:
@@ -60,6 +136,8 @@ def test_performance_of_f1():
 
 ```
 
+As mentioned [above](#before-introduction:-tl;dr), you can also add `Number` and `Repeat` arguments, in order to overwrite these settings (passed to `timeit.repeat()` as `number` and `repeat`, respectively) for this particular function call.
+
 If you now run `pytest` and the test passes, nothing will happen - just like with a regular `pytest` test. If the test fails, however, a `perftest.TimeTestError` exception will be thrown, with some additional information.
 
 This is the easiest way to use `perftest`. Its only drawback is that if the performance tests take much time, `pytest` will also take much time, something usually to be avoided. You can then do some `pytest` tricks to not run `perftest` tests, and run them only when you want - or you can simply use the above-described command-line `perftest` framework for performance testing.
@@ -91,7 +169,7 @@ As mentioned above, you can learn far more in [this heavy introduction](docs/Int
 
 To create a performance test for a function, you likely need to know how it behaves. You can run two simple benchmarking functions, `pt.memory_usage_benchmark()` and `pt.time_benchmark()`, which will run time and memory benchmarks, respectively. First, we will decrease `number` (passed to `timeit.repeat`), in order to shorten the benchmarks (which here serve as `doctest`s):
 
-```
+```python
 >>> import perftest as pt
 >>> def f(n): return sum(map(lambda i: i**0.5, range(n)))
 >>> pt.config.set(f, "time", number=1000)
@@ -99,6 +177,13 @@ To create a performance test for a function, you likely need to know how it beha
 >>> b_100_memory = pt.memory_usage_benchmark(f, n=100)
 >>> b_1000_time = pt.time_benchmark(f, n=1000)
 >>> b_1000_memory = pt.memory_usage_benchmark(f, n=1000)
+
+```
+
+Remember also about the possibility of overwriting (for this single benchmark) the settings from `pt.config.settings`, which you can do using `Number` and `Repeat`:
+
+```python
+>>> _ = pt.memory_usage_benchmark(f, n=1000, Repeat=10)
 
 ```
 
@@ -150,44 +235,53 @@ For time tests, we have the `pt.time_test()` function. First, a raw time test:
 
 
 ```python
->>> pt.time_test(f, 2e-05, None, n=100)
+>>> pt.time_test(f, raw_limit=2e-05, n=100)
 
 ```
 
 This stands for
 
 ```python
->>> pt.time_test(func=f, raw_limit=2e-05, relative_limit=None, n=100)
+>>> pt.time_test(func=f, raw_limit=2e-05, n=100)
+
+```
+
+Like before, we can use `Number` and `Repeat` arguments:
+
+```python
+>>> pt.time_test(func=f, raw_limit=2e-05, n=100, Number=10)
 
 ```
 
 Now, let's define a relative time test:
 
 ```python
->>> pt.time_test(f, None, 170, n=100)
+>>> pt.time_test(f, relative_limit=170, n=100)
 
 ```
 
 We also can combine both:
 
 ```python
->>> pt.time_test(f, 2e-05, 170, n=100)
+>>> pt.time_test(f, raw_limit=2e-05, relative_limit=170, n=100)
 
 ```
 
 Relative tests test the function's performance against the time that a built-in function (into the `config`) took to execute. This function does not matter, but the point is to compare relative execution time, as it should be more or less the same across different machines (and operating systems), even those on which raw times could differ quite a lot.
 
 
-### Time testing
+### Memory testing
 
 Memory tests use `pt.memory_usage_test()` function, which is used in the same way as `pt.time_test()`:
 
 ```python
->>> pt.memory_usage_test(f, 20, None, n=100) # test on raw memory
->>> pt.memory_usage_test(f, None, 1.01, n=100) # relative time test
->>> pt.memory_usage_test(f, 20, 1.01, n=100) # both
+>>> pt.memory_usage_test(f, raw_limit=20, n=100) # test on raw memory
+>>> pt.memory_usage_test(f, relative_limit=1.01, n=100) # relative time test
+>>> pt.memory_usage_test(f, raw_limit=20, relative_limit=1.01, n=100) # both
 
 ```
+
+In a memory usage test, a function is called only once. You can change that — but do that only if you have solid reasons — using, for example, `pt.config.set(f, "time", "repeat", 2)`, which will set this setting for the function in the configuration (so it will be used for all next calls for function `f()`). You can also do it just once (so, without saving the setting in `pt.config.settings`), using the `Repeat` argument.
 
 Of course, memory tests do not have to be very useful for functions that do not have to allocate too much memory, but as you will see in other documentation files in `perftest`, some function do use a lot of memory, and such tests for them do make quite a lot sense.
 

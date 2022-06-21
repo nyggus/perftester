@@ -43,9 +43,7 @@ def _read_cli_args():
         # sys.argv[1] is always a string, so no need to check it
         path = pathlib.Path(sys.argv[1])
     check_if_paths_exist(
-        path,
-        CLIPathError,
-        "Incorrent path provided with perftest CLI command"
+        path, CLIPathError, "Incorrent path provided with perftest CLI command"
     )
     if path.is_dir():
         files = _find_perftest_files(path)

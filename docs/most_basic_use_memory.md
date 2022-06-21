@@ -40,14 +40,14 @@ Let's run the function with `None` limits, to check its performance:
 We can define a simple memory use test, using raw values, as follows:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, 500, None, x)
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=500, x=x)
 
 ```
 
 If you overdo with the limit (below, we will expect 10 instead of 500) so that the test fails, you will see the following:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, 10, None, x) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=10, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
@@ -62,14 +62,14 @@ maximum memory usage = ...
 Alternatively, we can use relative memory testing, which will be more or less independent of a machine on which it's run:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, None, 40, x)
+>>> pt.memory_usage_test(sum_of_squares, relative_limit=40, x=x)
 
 ```
 
 If you overdo with the limit so that the test fails, you will see the following:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, None, 1, x) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(sum_of_squares, relative_limit=1, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
@@ -83,28 +83,28 @@ maximum obtained relative memory usage = ...
 And we can combine the two types of tests:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, 700, 40, x)
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=700, relative_limit=40, x=x)
 
 ```
 
 Again, here're three examples of a failed test:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, 10, 40, x) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=10, relative_limit=40, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
->>> pt.memory_usage_test(sum_of_squares, 10, 1, x) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=10, relative_limit=1, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
->>> pt.memory_usage_test(sum_of_squares, 10, 1, x) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=10, relative_limit=1, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
@@ -137,7 +137,7 @@ Our refactored function will be as follows:
 Now, let's see how it performs:
 
 ```python
->>> refactored_performance = pt.memory_usage_benchmark(sum_of_squares_refactored, x)
+>>> refactored_performance = pt.memory_usage_benchmark(sum_of_squares_refactored, x=x)
 >>> refactored_performance["max"] < first_run["max"] # so memory use after refactoring will be smaller
 True
 

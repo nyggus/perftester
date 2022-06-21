@@ -39,7 +39,7 @@ Fine, no need to change the settings, as the raw times are rather short, and the
 We can define a simple time-performance test, using raw values, as follows:
 
 ```python
->>> pt.time_test(preprocess, 2e-06, None, string=test_string)
+>>> pt.time_test(preprocess, raw_limit=2e-06, string=test_string)
 
 ```
 
@@ -48,7 +48,7 @@ As is with the `assert` statement, no output means that the test has passed.
 If you overdo with the limit so that the test fails, you will see the following:
 
 ```python
->>> pt.time_test(preprocess, 2e-08, None, string=test_string) #doctest: +ELLIPSIS
+>>> pt.time_test(preprocess, raw_limit=2e-08, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function preprocess:
@@ -63,14 +63,14 @@ minimum run time = ...
 Alternatively, we can use relative time testing, which will be more or less independent of a machine on which it's run:
 
 ```python
->>> pt.time_test(preprocess, None, 10, string=test_string)
+>>> pt.time_test(preprocess, relative_limit=10, string=test_string)
 
 ```
 
 If you overdo with the limit so that the test fails, you will see the following:
 
 ```python
->>> pt.time_test(preprocess, None, 1, string=test_string) #doctest: +ELLIPSIS
+>>> pt.time_test(preprocess, relative_limit=1, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function preprocess:
@@ -84,7 +84,7 @@ minimum time ratio = ...
 We can combine the two types of tests:
 
 ```python
->>> pt.time_test(preprocess, 2e-06, 10, string=test_string)
+>>> pt.time_test(preprocess, raw_limit=2e-06, relative_limit=10, string=test_string)
 
 ```
 
@@ -92,21 +92,21 @@ Again, here're three examples of a failed test:
 
 
 ```python
->>> pt.time_test(preprocess, 2e-08, 10, string=test_string) #doctest: +ELLIPSIS
+>>> pt.time_test(preprocess, raw_limit=2e-08, relative_limit=10, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function preprocess:
 raw_limit = 2e-08
 minimum run time = ...
 
->>> pt.time_test(preprocess, 2e-06, 1, string=test_string) #doctest: +ELLIPSIS
+>>> pt.time_test(preprocess, raw_limit=2e-06, relative_limit=1, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function preprocess:
 relative_limit = 1
 minimum time ratio = ...
 
->>> pt.time_test(preprocess, 2e-08, 1, string=test_string) #doctest: +ELLIPSIS
+>>> pt.time_test(preprocess, raw_limit=2e-08, relative_limit=1, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function preprocess:
