@@ -39,7 +39,7 @@ This creates object `pt.config`, which all `perftest` functions use, and which y
 In real life, you will seldom want to run the function five times (actually, fifteen times, as we have three repeats), but we do it here for the sake of doctests (to make them short enough). First, we need to check how much time this can take:
 
 ```python
->>> f_time_performance = pt.time_test(f, None, x=10, y=10)
+>>> f_time_performance = pt.time_benchmark(f, x=10, y=10)
 
 ```
 
@@ -63,6 +63,6 @@ We can safely expect that `f()` should not take much more than `0.1`. For many f
 So, we're ready to build our tests:
 
 ```python
->>> pt.time_test(f, pt.limits(0.101, None), x=10, y=10)
+>>> pt.time_test(f, 0.101, None, x=10, y=10)
 
 ```

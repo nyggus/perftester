@@ -6,7 +6,7 @@ import pathlib
 import sys
 from collections import namedtuple
 from easycheck import check_if_paths_exist
-from perftest import config, TimeError, MemoryError, CLIPathError
+from perftest import config, TimeTestError, MemoryTestError, CLIPathError
 
 
 TestResults = namedtuple("TestResults", "passed_tests failed_tests")
@@ -120,11 +120,11 @@ def _import_module(file):
 def _perftest(module_name, func, *args, **kwargs):
     try:
         func(*args, **kwargs)
-    except TimeError as e:
-        _log(f"\nTimeError in {module_name}.{func.__name__}\n{e}")
+    except TimeTestError as e:
+        _log(f"\nTimeTestError in {module_name}.{func.__name__}\n{e}")
         return 1
-    except MemoryError as e:
-        _log(f"\nMemoryError in {module_name}.{func.__name__}\n{e}")
+    except MemoryTestError as e:
+        _log(f"\nMemoryTestError in {module_name}.{func.__name__}\n{e}")
         return 1
     except Exception as e:
         _log(

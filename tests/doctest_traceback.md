@@ -7,22 +7,22 @@ The default behavior of `perftest` is to **not** incluide the full traceback whe
 
 ```python
 >>> import perftest as pt
->>> raise pt.TimeError
+>>> raise pt.TimeTestError
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError
+perftest.perftest.TimeTestError
 
 >>> pt.config.full_traceback()
->>> raise pt.TimeError
+>>> raise pt.TimeTestError
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError
+perftest.perftest.TimeTestError
 
 >>> pt.config.cut_traceback()
->>> raise pt.TimeError
+>>> raise pt.TimeTestError
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError
+perftest.perftest.TimeTestError
 
 ```
 
@@ -30,18 +30,18 @@ perftest.perftest.TimeError
 >>> import time
 >>> def f(): time.sleep(.1)
 >>> pt.config.set(f, "time", number=1, repeat=1)
->>> pt.time_test(f, (.001, None)) #doctest: +ELLIPSIS
+>>> pt.time_test(f, .001, None) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError: Time test not passed for function f:
+perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = ...
 minimum run time = ...
 
 >>> pt.config.full_traceback()
->>> pt.time_test(f, (.001, None)) #doctest: +ELLIPSIS
+>>> pt.time_test(f, .001, None) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError: Time test not passed for function f:
+perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = ...
 minimum run time = ...
 
@@ -51,7 +51,7 @@ And this is the actual output you would see in your console; I removed most of t
 
 ```python
 # pt.time_test(f, (.001, None))
-perftest.perftest.TimeError: Time test not passed for function f:
+perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = 0.001
 minimum run time = 0.10100129999773344
 ```
@@ -67,7 +67,7 @@ Traceback (most recent call last):
     _raise(handle_with, message)
   File ".../site-packages/easycheck-0.3.1-py3.8.egg/easycheck/easycheck.py", line 848, in _raise
     raise error(message)
-perftest.perftest.TimeError: Time test not passed for function f:
+perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = 0.001
 minimum run time = 0.10065620000023046
 ```

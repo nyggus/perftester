@@ -18,15 +18,17 @@ Let's check out the `@cache` decorator from `functools`. As it is available from
 Let's benchmark both functions:
 
 ```python
->>> no_cache = pt.benchmark(factorial, 100)
->>> with_cache = pt.benchmark(factorial_cached, 100)
+>>> time_no_cache = pt.time_benchmark(factorial, 100)
+>>> time_with_cache = pt.time_benchmark(factorial_cached, 100)
+>>> memory_no_cache = pt.memory_usage_benchmark(factorial, 100)
+>>> memory_with_cache = pt.memory_usage_benchmark(factorial_cached, 100)
 
 ```
 
 Definitely, and as expected, the cached version takes a lot less time:
 
 ```python
->>> no_cache["time"]["min"] / with_cache["time"]["min"] > 100
+>>> time_no_cache["min"] / time_with_cache["min"] > 100
 True
 
 ```
@@ -35,7 +37,8 @@ And as this the `@lru_cache` decorator does not use RAM but cache memory, we sho
 
 
 ```python
->>> 1.01 > no_cache["memory"]["max"] / with_cache["memory"]["max"] > 0.99
+>>> import math
+>>> math.isclose(memory_no_cache["max"], memory_with_cache["max"], rel_tol=.01)
 True
 
 ```

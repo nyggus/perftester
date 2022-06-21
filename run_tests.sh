@@ -24,8 +24,6 @@ echo -- docs/README.md
 python -m doctest README.md
 echo -- docs/use_case_raw_time_testing.md
 python -m doctest use_case_raw_time_testing.md
-echo -- docs/use_of_limits.md
-python -m doctest use_of_limits.md
 echo -- change_benchmarking_function.md
 python -m doctest change_benchmarking_function.md
 

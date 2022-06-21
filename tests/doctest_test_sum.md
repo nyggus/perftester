@@ -4,17 +4,22 @@ Catch exceptions:
 
 ```python
 >>> import perftest as pt
->>> pt.time_test(sum, (None, None), "this cannot be summed up")
+>>> pt.time_test(sum, 1, None, "this cannot be summed up")
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
->>> pt.memory_usage_test(sum, (None, None), "this cannot be summed up")
+>>> pt.memory_usage_test(sum, 1, None, "this cannot be summed up")
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
->>> pt.benchmark(sum, "this cannot be summed up")
+>>> pt.time_benchmark(sum, "this cannot be summed up")
+Traceback (most recent call last):
+    ...
+perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+
+>>> pt.memory_usage_benchmark(sum, "this cannot be summed up")
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
@@ -25,11 +30,13 @@ Make benchmarks:
 
 ```python
 >>> n_of_test_repeats = 3 # how many times to conduct each test
->>> sum_perf_twice = {}
+>>> time_sum_perf_twice = {}
+>>> memory_sum_perf_twice = {}
 >>> n_set = 10, 20, 30, 100, 1000, 
 >>> sum_twice = lambda x: sum(x) + sum(x)
 >>> for n in n_set:
-...    sum_perf_twice[n] = pt.benchmark(sum_twice, range(n))
+...    time_sum_perf_twice[n] = pt.time_benchmark(sum_twice, range(n))
+...    memory_sum_perf_twice[n] = pt.memory_usage_benchmark(sum_twice, range(n))
 >>>  
 
 
@@ -45,11 +52,10 @@ If you run the function `sum` once, you will do it quicker than when you do it t
 ```python
 >>> for n in n_set:
 ...    for _ in range(n_of_test_repeats):
-...        pt.time_test(
-...            sum,
-...            pt.limits(sum_perf_twice[n]["time"]["min"], None),
-...            range(n)
-...        )
+...        pt.time_test(sum,
+...                     time_sum_perf_twice[n]["min"],
+...                     None,
+...                     range(n))
 
 ```
 
@@ -60,14 +66,13 @@ In terms of memory, this should not have any effect, so clearly one of the below
 ```python
 >>> for n in n_set:
 ...    for _ in range(n_of_test_repeats):
-...        pt.memory_usage_test(
-...            sum,
-...            pt.limits(sum_perf_twice[n]["memory"]["max"], None),
-...            range(n)
-...        ) #doctest: +ELLIPSIS
+...        pt.memory_usage_test(sum,
+...                             memory_sum_perf_twice[n]["max"],
+...                             None,
+...                             range(n)) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function sum:
+perftest.perftest.MemoryTestError: Memory test not passed for function sum:
 memory_limit = ...
 maximum memory usage = ...
 

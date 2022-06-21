@@ -1,8 +1,8 @@
 # `perftest`: Simple performance testing for Python
 
-`perftest` is a lightweight package for simple performance testing in Python. Here, performance refers to execution time and memory usage, so performance testing means testing if a function performs quickly enough and does not use too much RAM. In addition, the module offers you a simple function for straightforward benchmarking, in terms of both execution time and memory.
+`perftest` is a lightweight package for simple performance testing in Python. Here, performance refers to execution time and memory usage, so performance testing means testing if a function performs quickly enough and does not use too much RAM. In addition, the module offers you simple functions for straightforward benchmarking, in terms of both execution time and memory.
 
-The idea behind the package is to enable the user to write simple performance tests. They can be used in `doctest`s and `pytest`s, but ffirst of all, `perftest` offers its own performance testing framework, which you should rather prefer, since performance tests can take some time. Thus, it's better not to mix unit and performance tests.
+The idea behind the package is to enable the user to write simple performance tests. They can be used in `doctest`s and `pytest`s, but first of all, `perftest` offers its own performance testing framework, which you should rather prefer, since performance tests can be time-consuming. Thus, it's better not to mix unit and performance tests.
 
 The module assumes simplicity, which means simplicity at two levels:
 * simple performance tests, so that you do not need make far-going assumptions about the tests - you can first run benchmarks, see what's going on, and use them to create tests; and
@@ -17,9 +17,7 @@ This assumption, however, also means that the module offers simple performance t
 
 ### `perftest` as a benchmarking tool
 
-Although `perftest` mainly offers a testing tool, it can also be treated as a benchmarking tool that enables you to easily benchmark time and memory use of a function. You can do so in two ways: first, enough **not** to define limits for tests (actually, define them as `None`); then, the functions will simply return detailed benchmark results, similar to those you would get from `timeit.repeat` and `memory_profiler.memory_usage`, with some summaries.
-
-However, for the sake of simplicity, `perftest` offers you a `benchmark()` function, which runs both time and memory benchmarks. You can treat it as a simple benchmarking tool for a function, you can compare the performance of two (or more) functions, but you can also use the function for setting up limits to be used for a particular function.
+Although `perftest` mainly offers a testing tool, it can also be treated as a benchmarking tool that enables you to easily benchmark time and memory use of a function. You can use two functions: `time_benchmark()` and `memory_usage_benchmark()`. You can treat them as simple benchmarking tools for a function, you can use them to compare the performance of two (or more) functions, but you can also use the function for setting up limits to be used for a particular function.
 
 See [here](#simple-benchmarking) for examples.
 
@@ -31,9 +29,9 @@ Surely, any performance tests are strongly environment-dependent, so you need to
 * raw values: raw execution time and raw memory usage, and
 * relative values: relative execution time and relative memory usage
 
-Above, _relative_ means benchmarking against an in-built (into `perftest`) simple function. Thus, you can, for instance, test whether your function is two times slower than this function. The benchmarking function itself does not matter, as it is just a benchmark. What matters is that, usually, your function should _relatively to this benchmarking function_ behave the same way between different machines. So, if it works two times slower than the benchmarking function on your machine, then it should work in a similar way in another machine, even if this other machine is much faster than yours. Of course, this assumes linearity (so, two times slower here means two times slower everywhere), which does not have to be always true. Anyway, such tests will almost always be more representative, and more precise, than those based on raw times.
+Above, _relative_ means benchmarking against a built-in (into `perftest`) simple function. Thus, you can, for instance, test whether your function is two times slower than this function. The benchmarking function itself does not matter, as it is just a benchmark. What matters is that, usually, your function should _relatively to this benchmarking function_ behave the same way between different machines. So, if it works two times slower than the benchmarking function on your machine, then it should work in a similar way on another machine, even if this other machine is much faster than yours. Of course, this assumes linearity (so, two times slower here means two times slower everywhere), which does not have to be always true. Anyway, such tests will almost always be more representative, and more precise, than those based on raw times.
 
-This does not mean, however, that raw tests are useless. In fact, in a production environment, you may wish to use raw tests. Imagine a client expects that an app never takes longer than an hour to perform a particular task (note that this stringly depends on what other processes are run in the production environment). You can create an automated test for that using `perftest`, in a very simple way - just several lines of code.
+This does not mean, however, that raw tests are useless. In fact, in a production environment, you may wish to use raw tests. Imagine a client expects that an app never takes longer than an hour to perform a particular task (note that this strongly depends on what other processes are run in the production environment). You can create an automated test for that using `perftest`, in a very simple way - just several lines of code.
 
 You can of course combine both types of tests, and you can do it in a very simple way. Then, the test is run once, but the results are checked with raw limits and relative limits.
 
@@ -51,7 +49,7 @@ The package has three external dependencies: [`memory_profiler`](https://pypi.or
 
 ## Use
 
-The `perftest` package comes with three functions: `time_test()`, `memory_usage_test()` and `benchmark()`. The first one enables you to conduct performance testing in time context, while the second in memory-use context; below you will find examples of how to use both. The third function enables you to benchmark a function.
+The `perftest` package comes with four functions: `time_test()`, `time_benchmark()`, `memory_usage_test()`, and `memory_usage_benchmark()`. The first one enables you to conduct performance testing in time context, while the third in memory-use context; the other two enable you to perform the corresponding benchmarks.
 
 
 ## Configuration
@@ -93,17 +91,15 @@ Let's run the benchmark:
 
 
 ```python
->>> first_run = pt.time_test(f, None, n=1000)
+>>> first_run = pt.time_benchmark(f, n=1000)
 
 ```
 
-Note the second argument, `None`, which stands for `time_limits=None`. This means that we do not set any limits for this run, so we will simply see how the function performs. `n=1000` means that we want to run `f(1000)`; you can provide here any `*args` and `**kwargs` that the function requires.
-
-Like in regression testing, you can now check how the function performed. It returns a dictionary with the following keys:
+Here, `n=1000` means that we want to run `f(1000)`; you can provide here any `*args` and `**kwargs` that the function requires. The function returns a dictionary with the following keys:
 
 ```python
 >>> first_run.keys()
-dict_keys(['raw_times', 'raw_times_relative', 'mean', 'max', 'min', 'min_relative'])
+dict_keys(['min', 'min_relative', 'raw_times', 'raw_times_relative', 'mean', 'max'])
 
 ```
 
@@ -119,32 +115,22 @@ Dictionary `first_run`, in my machine, shows the following results:
  'min_relative': 329.0}
  ```
 
- Note that list `"raw_times"` contains mean values per single run of the function. Remember this, because this is a different approach than that taken by `timeit` functions, which provides results summarized for all runs. Here, the results need to be normalized, in order to make it easy to define a test and then change its settings (that is, `number`) without the necessity to change the limits. So, the effect of `number` is different here than in `timeit` functions, in which the bigger the `number`, the bigger the execution times. In `perftest`, `number` affects the precision of the result (the more runs of the function, the less standard error of the estimation of the mean time). This approach has also one particular advantage: You can see how much time the function needs to run on your machine.
+Note that list `"raw_times"` contains mean values per single run of the function. Remember this, because this is a different approach than that taken by `timeit` functions (`timeit.timeit()` and `timeit.repeat()`), which provide results summarized for all runs. Here, the results need to be normalized, in order to make it easy to define a test and then change its settings (that is, `number`) without the necessity to change the limits. So, the effect of `number` is different here than in `timeit` functions, in which the bigger the `number`, the bigger the execution times. In `perftest`, `number` affects the precision of the result (the more runs of the function, the less standard error of the estimation of the mean time). This approach has also one particular advantage: You can see how much time the function needs to run on your machine.
 
-We're ready to define test limits. Of course, they should be a little higher than those obtained here. Do remember that these results depend also on all the other processes your machine is running.
+We're ready to define test limits. Of course, they should be a little higher than those obtained in the above benchmarks. Do remember that these results depend also on all the other processes your machine is running.
 
 ```python
->>> pt.time_test(f, pt.limits(6e-05, None), n=1000)
+>>> pt.time_test(f, 6e-05, None, n=1000)
 
 ```
 
-> Note that we used `pt.limits` to provide the limits; we will also use `pt.limits` to provide limits in `memory_usage_test`. It's an instance of a namedtuple limits, with two attributes: `raw_limit` and `relative_limit`:
+Running the above test should return nothing and throw nothing. Like with `pytest`s and `doctest`s, this means that the test has passed. If a test fails (below it will, because we will make the raw time limit an unrealistic zero), the following happens:
 
 ```python
->>> pt.limits._fields
-('raw_limit', 'relative_limit')
-
-```
-
-Read more about `perftest.limits` [here](use_of_limits.md).
-
-Running the above test should return nothing and throw nothing. Like with `pytest`s and `doctest`s, this means that the test passed. If a test fails (here it will because we will make the raw time limit an unrealistic zero), the following happens:
-
-```python
->>> pt.time_test(f, pt.limits(0, None), n=1000) #doctest: +ELLIPSIS
+>>> pt.time_test(f, 0, None, n=1000) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError: Time test not passed for function f:
+perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = 0
 minimum run time = ...
 
@@ -158,13 +144,13 @@ minimum run time = ...
 A relative time-related test can look like this:
 
 ```python
->>> pt.time_test(f, pt.limits(None, 700), n=1000)
+>>> pt.time_test(f, None, 700, n=1000)
 
 ```
 
-The value of 700 means that the tested function should be at most 700 times slower than the benchmarking function. Don't pay too much attention to interpretion of this factor, as it depends on the `pt.config.benchmark_function()`, which does not really lie within our interest: it's just a function, and you do not even have to know its code. You can even overwrite this function and use your own one, if you wish (see [here](change_benchmarking_function.md)). The point is that thanks to such a relative approach, you can be more or less sure that the test will behave the same way in your machine, in a much slower machine, and also in a much quicker machine. This would unlikely be the case when using raw approach to time-performance testing.
+The value of 700 means that the tested function should be at most 700 times slower than the benchmarking function (that is, a function doing nothing). Don't pay too much attention to the interpretion of this factor, as it depends on the `pt.config.benchmark_function()`, which does not really lie within our interest, although it does inform us about something: it's an empty function (`def foo(): pass`), so it represents an overhead cost of calling a function. You can overwrite this function and use your own one, if you wish (see [here](change_benchmarking_function.md)). The point is that thanks to such a relative approach, you can be more or less sure that the test will behave the same way in your machine, in a much slower machine, and also in a much quicker one. This would unlikely be the case when using raw approach to time-performance testing.
 
-However, you can compare this value between functions. Consider another function:
+However, you can compare the relative results between functions. Consider another function:
 
 ```python
 >>> import array
@@ -175,11 +161,11 @@ However, you can compare this value between functions. Consider another function
 And now let's run the same test, but with a smaller `n` (to save time in `doctest`s):
 
 ```python
->>> pt.time_test(f, pt.limits(None, 9), n=10)
->>> pt.time_test(f2, pt.limits(None, 9), n=10) #doctest: +ELLIPSIS
+>>> pt.time_test(f, None, 9, n=10)
+>>> pt.time_test(f2, None, 9, n=10) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeError: Time test not passed for function f2:
+perftest.perftest.TimeTestError: Time test not passed for function f2:
 relative_limit = 9
 minimum time ratio = ...
 
@@ -190,7 +176,7 @@ In my machine, the `minumum time ratio` for `f2()` was about 12.65, so bigger th
 
 ### `memory_usage_test()`
 
-`memory_usage_test()` uses `memory_profiler.memory_usage()` to run tests. Its default behavior is run tests only once, as it does not make sense to repeat `memory_profiler.memory_usage()`: it will take almost the same time throughout the runs. There can be some exceptions, however; for instance, when a function has some random component and does not know at compile time how much memory it will have to allocate. For such situations, `perftest` enables you to increase `repeat` for a particular functions in memory tests. You can do so using `pt.config.set()`, for instance in the following way: `pt.config.set(my_function, "memory", repeat=10)`.
+`memory_usage_test()` uses `memory_profiler.memory_usage()` to run tests. Its default behavior is to run the test only once, as it does not make sense to repeat `memory_profiler.memory_usage()`: it will take almost the same time throughout the runs. There can be some exceptions, however; for instance, when a function has some random component and does not know at compile time how much memory it will have to allocate. For such situations, `perftest` enables you to set `repeat` for a particular function in memory tests. You can do so using `pt.config.set()`, for instance in the following way: `pt.config.set(my_function, "memory", repeat=10)`. (Note there is no `number` argument used for memory testing.)
 
 
 ### Raw memory usage testing
@@ -198,7 +184,7 @@ In my machine, the `minumum time ratio` for `f2()` was about 12.65, so bigger th
 This is how you can check the performance in terms of memory use of your function:
 
 ```python
->>> first_run = pt.memory_usage_test(f, None, n=1000)
+>>> first_run = pt.memory_usage_benchmark(f, n=1000)
 
 ```
 
@@ -214,6 +200,8 @@ This is what `first_run` returned on my machine:
  'raw_results': [[16.77, 16.77, 16.77]],
  'relative_results': [[1.003, 1.004, 1.004]]}
 ```
+
+> Function `f` uses very little memory. You can check that by benchmarking a function `def foo(): pass`, which will basically use the same memory as `f()` did.
 
 Note the three values in `raw_results`. `memory_profiler.memory_usage()` measures memory use over time, and these are the results. The number of such measurements depends on the function. Read more 
 
@@ -269,7 +257,7 @@ That's quite a difference! Clearly, `array.array` is optimized in terms of memor
  'min_relative': 6572000.0}
 ```
 
-So, although `array.array` uses far less memory, it does take a little more time to create a 10-mln array of integers than does a function creating a list of integers. However, the gain in memory use of `array.array` over list is much bigger than the list's gain in execution time over `array.array`.
+So, although `array.array` uses far less memory, it does take a little more time to create a 10-mln array of integers than does a function creating a list of integers. However, the gain in memory use of `array.array` over the list is much bigger than the list's gain in execution time over `array.array`.
 
 
 ### Relative memory usage testing
@@ -277,11 +265,11 @@ So, although `array.array` uses far less memory, it does take a little more time
 Like with `time_test`, you can also use relative testing:
 
 ```python
->>> pt.memory_usage_test(f2, pt.limits(None, 5), n=10_000_000)
->>> pt.memory_usage_test(f, pt.limits(None, 2), n=10_000_000) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(f2, None, 5, n=10_000_000)
+>>> pt.memory_usage_test(f, None, 2, n=10_000_000) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryError: Memory test not passed for function f:
+perftest.perftest.MemoryTestError: Memory test not passed for function f:
 relative memory limit = 2
 maximum obtained relative memory usage = ...
 
@@ -290,15 +278,15 @@ maximum obtained relative memory usage = ...
 
 ## Relative tests against another function
 
-In the basic use, when you choose a relative benchmark, you compare the performance of your function with that of a built-in function `pt.config.benchmark_function()`. In most cases, this is what you need. Sometimes, however, you may wish to benchmark against another function. For instance, you may want to build your own function that does the same thing as a Python in-built function, and you want to test (and show) that your function performs better. There are two ways of achieving this:
+In the basic use, when you choose a relative benchmark, you compare the performance of your function with that of a built-in (empty) function `pt.config.benchmark_function()`. In most cases, this is what you need. Sometimes, however, you may wish to benchmark against another function. For instance, you may want to build your own function that does the same thing as a Python built-in function, and you want to test (and show) that your function performs better. There are two ways of achieving this:
 
 * you can use a simple trick; [see here](benchmarking_against_another_function.md);
-* you can overwrite the in-built benchmark functions; [see here](change_benchmarking_function.md).
+* you can overwrite the built-in benchmark functions; [see here](change_benchmarking_function.md).
 
 
 ## Simple benchmarking
 
-The `perftest` module offers a `benchmark()` function that enables you to run both types of benchmarks (type- and memory-related) with one command. The `benchmark()` function is a wrapper around `time_test()` and `memory_usage_test()`, so it uses `perftest`'s `config` in the very same way as these two functions.
+The `perftest` module offers `time_benchmark()` and `memory_usage_benchmark()` functions that enable you to run both types of benchmarks (type- and memory-related) with one command. Both functions use settings from `perftest`'s `config` in the very same way as the two corresponding testing functions (`time_test()` and `memory_usage_test()`).
 
 Let's see some examples. I will change the default settings, so that the doctests do not take too much time and the results are not too long:
 
@@ -313,57 +301,63 @@ Note that although it does not change the settings for the functions that `pt.co
 >>> def sum_of_squares(x): return sum(i**2 for i in x)
 >>> def square_of_sum(x): return sum(x)**2
 >>> x = [1.0002, 56.0303, 780, 0.1, 445.55553, 190.01, 56.76]*100_000
->>> bench_sum_of_squares = pt.benchmark(sum_of_squares, x)
->>> bench_square_of_sum = pt.benchmark(square_of_sum, x)
+>>> time_bench_sum_of_squares = pt.time_benchmark(sum_of_squares, x)
+>>> memory_bench_sum_of_squares = pt.memory_usage_benchmark(sum_of_squares, x)
+>>> time_bench_square_of_sum = pt.time_benchmark(square_of_sum, x)
+>>> memory_bench_square_of_sum = pt.memory_usage_benchmark(square_of_sum, x)
 
 ```
 
-We can see the benchmarks using `pt.pp(bench_sum_of_squares)` and `pt.pp(square_of_sum)`. In my machine, this gives the following:
+We can see the benchmarks using the `pt.pp()` function. In my machine, this gives the following results:
 
 ```python
-# pt.pp(bench_sum_of_squares)
-{'memory': {'max': 21.96,
-            'max_relative': 1.0,
-            'max_result_per_run': [21.96],
-            'max_result_per_run_relative': [1.0],
-            'mean': 21.96,
-            'mean_result_per_run': [21.96],
-            'raw_results': [[21.96,
-                             21.96,
-                             21.96,
-                             21.96,
-                             21.96,
-                             21.96,
-                             21.96,
-                             21.96]],
-            'relative_results': [[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]]},
- 'time': {'raw_times': [0.05726],
-          'raw_times_relative': [238600.0],
-          'max': 0.05726,
-          'mean': 0.05726,
-          'min': 0.05726,
-          'min_relative': 238600.0}}
+# pt.pp(memory_bench_sum_of_squares)
+{'max': 21.96,
+'max_relative': 1.0,
+'max_result_per_run': [21.96],
+'max_result_per_run_relative': [1.0],
+'mean': 21.96,
+'mean_result_per_run': [21.96],
+'raw_results': [[21.96,
+                    21.96,
+                    21.96,
+                    21.96,
+                    21.96,
+                    21.96,
+                    21.96,
+                    21.96]],
+'relative_results': [[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]]}
 
-# pt.pp(bench_square_of_sum)
-{'memory': {'max': 21.98,
-            'max_relative': 1.0,
-            'max_result_per_run': [21.98],
-            'max_result_per_run_relative': [1.0],
-            'mean': 21.98,
-            'mean_result_per_run': [21.98],
-            'raw_results': [[21.98, 21.98, 21.98, 21.98]],
-            'relative_results': [[1.0, 1.0, 1.0, 1.0]]},
- 'time': {'raw_times': [0.002721],
-          'raw_times_relative': [10880.0],
-          'max': 0.002721,
-          'mean': 0.002721,
-          'min': 0.002721,
-          'min_relative': 10880.0}}
+# pt.pp(time_bench_sum_of_squares)
+{'raw_times': [0.05726],
+'raw_times_relative': [238600.0],
+'max': 0.05726,
+'mean': 0.05726,
+'min': 0.05726,
+'min_relative': 238600.0}
+
+# pt.pp(memory_bench_square_of_sum)
+{'max': 21.98,
+'max_relative': 1.0,
+'max_result_per_run': [21.98],
+'max_result_per_run_relative': [1.0],
+'mean': 21.98,
+'mean_result_per_run': [21.98],
+'raw_results': [[21.98, 21.98, 21.98, 21.98]],
+'relative_results': [[1.0, 1.0, 1.0, 1.0]]
+
+# # pt.pp(time_bench_square_of_sum)
+{'raw_times': [0.002721],
+'raw_times_relative': [10880.0],
+'max': 0.002721,
+'mean': 0.002721,
+'min': 0.002721,
+'min_relative': 10880.0}
 ```
 
-We can see that both functions use more or less the same memory, but, expectedly, `square_of_sum` uses much less time than `sum_of_square`.
+We can see that both functions use more or less the same memory, but, expectedly, `square_of_sum()` uses much less time than `sum_of_square()`.
 
-You can use these results to compare the performance of the functions, but also to define  `time_limits` for `time_test()` and `memory_limits` for `memory_usage_test()`.
+You can use these results to compare the performance of the functions, but also to define `raw_limits` and `relative_limits` for `time_test()` and `memory_usage_test()`.
 
 
 ## Other tools
@@ -374,7 +368,7 @@ Of course, Python comes with various powerful tools for profiling, benchmarking 
 * [the built-in `timeit` module](https://docs.python.org/3/library/timeit.html), for benchmarking
 * [`memory_profiler`](https://pypi.org/project/memory-profiler/), a powerful memory profiler (`memory_profiler` is utilized by `perftest`)
   
-In fact, `perftest` is just a simple wrapper around `timeit` and `memory_profiler`, as itself, `perftest` does not come with its own solutions. It simply uses these functions and enables the user to test the results.
+In fact, `perftest` is just a simple wrapper around `timeit` and `memory_profiler`, since `perftest` itself does not come with its own solutions. It simply uses these functions and offers an easy-to-use API to benchmark and test memory and time performance.
 
 
 ## Additional notes

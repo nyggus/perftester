@@ -93,20 +93,24 @@ In some tests, we will the following function:
 (3.5..., 3.5..., 3.5..., 3.5...)
 
 >>> pt.config.set_defaults("time", number=100)
->>> var_perf = pt.benchmark(variance, x_short)
->>> var_perf_2 = pt.benchmark(variance_2, x_short)
->>> var_perf_3 = pt.benchmark(variance_3, x_short)
->>> var_perf_4 = pt.benchmark(variance_4, x_short)
+>>> var_perf_time = pt.time_benchmark(variance, x_short)
+>>> var_perf_2_time = pt.time_benchmark(variance_2, x_short)
+>>> var_perf_3_time = pt.time_benchmark(variance_3, x_short)
+>>> var_perf_4_time = pt.time_benchmark(variance_4, x_short)
+>>> var_perf_memory = pt.memory_usage_benchmark(variance, x_short)
+>>> var_perf_2_memory = pt.memory_usage_benchmark(variance_2, x_short)
+>>> var_perf_3_memory = pt.memory_usage_benchmark(variance_3, x_short)
+>>> var_perf_4_memory = pt.memory_usage_benchmark(variance_4, x_short)
 
->>> var_perf["time"]["min"] > var_perf_4["time"]["min"]
+>>> var_perf_time["min"] > var_perf_4_time["min"]
 True
->>> var_perf["time"]["min"] > var_perf_2["time"]["min"]
+>>> var_perf_time["min"] > var_perf_2_time["min"]
 True
->>> var_perf["time"]["min"] > var_perf_3["time"]["min"]
+>>> var_perf_time["min"] > var_perf_3_time["min"]
 True
->>> var_perf_2["time"]["min"] > var_perf_3["time"]["min"]
+>>> var_perf_2_time["min"] > var_perf_3_time["min"]
 True
->>> var_perf_4["time"]["min"] > var_perf_3["time"]["min"]
+>>> var_perf_4_time["min"] > var_perf_3_time["min"]
 True
 
 ```
@@ -119,7 +123,7 @@ Differences between the four functions are significant, particularly `variance()
 For such small lists, memory should not be a problem, and we can assume that all these functions will use similar memory.
 
 ```python
->>> max_memories = [v["memory"]["max_relative"] for v in (var_perf, var_perf_2, var_perf_3, var_perf_4)] 
+>>> max_memories = [v["max_relative"] for v in (var_perf_memory, var_perf_2_memory, var_perf_3_memory, var_perf_4_memory)] 
 >>> all(memory >= 1 and memory < 1.02 for memory in max_memories)
 True
 
@@ -151,27 +155,27 @@ So, for a short list, all the four functions used very similar memory. This, how
 ### Time benchmarking
 
 ```python
->>> var_perf = pt.benchmark(variance, x_long)
->>> var_perf_2 = pt.benchmark(variance_2, x_long)
->>> var_perf_3 = pt.benchmark(variance_3, x_long)
->>> var_perf_4 = pt.benchmark(variance_4, x_long)
+>>> var_perf_time = pt.time_benchmark(variance, x_long)
+>>> var_perf_2_time = pt.time_benchmark(variance_2, x_long)
+>>> var_perf_3_time = pt.time_benchmark(variance_3, x_long)
+>>> var_perf_4_time = pt.time_benchmark(variance_4, x_long)
 
 >>> times2 = [
-...     var_perf["time"]["min"],
-...     var_perf_4["time"]["min"],
-...     var_perf_3["time"]["min"]
+...     var_perf_time["min"],
+...     var_perf_4_time["min"],
+...     var_perf_3_time["min"]
 ... ]
 >>> is_sorted(times2, reverse=True)
 True
 
 ```
 
-(In the test above, we did not use `var_perf_2`, as from time to time it is quicker than `vat_perf_3`.)
+(In the test above, we did not use `var_perf_2`, as from time to time it is quicker than `var_perf_3`.)
 
 Here, the point is not only in the ordering. Most interesting is that `variance()` is at least 100 slower than the other three versions - let's compare it to the qucikest version, `variance_3()`:
 
 ```python
->>> var_perf["time"]["min"] / var_perf_3["time"]["min"] > 100
+>>> var_perf_time["min"] / var_perf_3_time["min"] > 100
 True
 
 ```
@@ -197,8 +201,8 @@ As before, you can see the results in [this file](results_of_floats.md).
 Another interesting thing is that `variance_4()`, despite using generators, used a little more memory than the other three functions. This is likely because of using three generators:
 
 ```python
-# for i in (var_perf, var_perf_2, var_perf_3, var_perf_4):
-#     pt.pp(i["memory"]["max"])
+# for i in (var_perf_memory, var_perf_2_memory, var_perf_3_memory, var_perf_4_memory):
+#     pt.pp(i["max"])
 18.44
 18.44
 18.86

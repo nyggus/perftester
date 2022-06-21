@@ -61,3 +61,4 @@ pt.config.log_file = pathlib.Path(".") / "perftest.log"
 ```
 
 > You must do that in the config_perftest.py file, not elsewhere.
+> 

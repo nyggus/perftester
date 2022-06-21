@@ -24,17 +24,22 @@ A function to be tested (just a function with some string manipulations, nothing
 Note that when an exception is raised from the tested function, the `perftest` functions will throw the `perftest.FunctionError` error, which will contain the original error, too:
 
 ```python
->>> pt.time_test(preprocess, None, 123)
+>>> pt.time_test(preprocess, 1, None, 123)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
->>> pt.memory_usage_test(preprocess, None, 123)
+>>> pt.memory_usage_test(preprocess, 1, None, 123)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
->>> pt.benchmark(preprocess, 123)
+>>> pt.time_benchmark(preprocess, 123)
+Traceback (most recent call last):
+    ...
+perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
+
+>>> pt.memory_usage_benchmark(preprocess, 123)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
@@ -55,66 +60,45 @@ True
 ## Testing `time_test()` function
 
 ```python
->>> results_time = pt.time_test(preprocess, None, "123")
->>> assert_instance(results_time, dict)
->>> results_time.keys()
-dict_keys(['min', 'min_relative', 'raw_times', 'raw_times_relative', 'mean', 'max'])
+>>> results_time = pt.time_test(preprocess, 1, None, "123")
 
->>> exp_l = pt.config.get_setting(preprocess, "time", "repeat") # expected length, as defined in config
->>> assert_length(results_time["raw_times"], exp_l)
->>> assert_length(results_time["raw_times_relative"], exp_l)
->>> assert_if(results_time["mean"] >= results_time["min"])
->>> assert_if(results_time["max"] >= results_time["mean"])
+>>> results_time = pt.time_test(preprocess, None, 10, "123")
 
 ```
 
 ##  Testing `memory_usage_test()` function
 
 ```python
->>> results_memory = pt.memory_usage_test(preprocess, None, "123")
->>> assert_instance(results_memory, dict)
->>> results_memory.keys()
-dict_keys(['raw_results', 'relative_results', 'mean_result_per_run', 'max_result_per_run', 'max_result_per_run_relative', 'mean', 'max', 'max_relative'])
+>>> results_memory = pt.memory_usage_test(preprocess, 20, None, "123")
 
->>> assert_length(results_memory["max_result_per_run_relative"], 1)
->>> assert_length(results_memory["max_result_per_run"], 1)
->>> assert_length(results_memory["relative_results"], 1)
->>> assert_length(results_memory["raw_results"], 1)
->>> assert_if(results_memory["max"] >= results_memory["mean"])
+>>> results_memory = pt.memory_usage_test(preprocess, None, 3, "123")
 
 ```
 
-##  Testing `benchmark()` function
+##  Testing `time_benchmark()` function
 
 ```python
->>> results_bench = pt.benchmark(preprocess, "123")
->>> assert_instance(results_bench, dict)
->>> results_bench.keys()
-dict_keys(['time', 'memory'])
->>> assert_instance(results_bench["time"], dict)
->>> assert_instance(results_bench["memory"], dict)
+>>> results_bench_time = pt.time_benchmark(preprocess, "123")
+>>> assert_instance(results_bench_time, dict)
+>>> exp_l = pt.config.get_setting(preprocess, "time", "repeat") # expected length, as defined in config
+>>> assert_length(results_bench_time["raw_times"], exp_l)
+>>> assert_length(results_bench_time["raw_times_relative"], exp_l)
+>>> assert_if(results_bench_time["max"] >= results_bench_time["mean"])
+>>> results_bench_time.keys()
+dict_keys(['min', 'min_relative', 'raw_times', 'raw_times_relative', 'mean', 'max'])
 
 ```
 
-#### Tests of the `"time"` part
+## Testing `memory_usage_benchmark()` function
 
 ```python
->>> assert_length(results_bench["time"]["raw_times"], exp_l)
->>> assert_length(results_bench["time"]["raw_times_relative"], exp_l)
->>> assert_if(results_bench["time"]["max"] >= results_bench["time"]["mean"])
+>>> results_bench_memory = pt.memory_usage_benchmark(preprocess, "123")
+>>> assert_instance(results_bench_memory, dict)
 
-```
-
-#### Tests of the `"memory"` part:
-
-```python
->>> results_memory.keys()
-dict_keys(['raw_results', 'relative_results', 'mean_result_per_run', 'max_result_per_run', 'max_result_per_run_relative', 'mean', 'max', 'max_relative'])
-
->>> assert_length(results_bench["memory"]["max_result_per_run_relative"], 1)
->>> assert_length(results_bench["memory"]["max_result_per_run"], 1)
->>> assert_length(results_bench["memory"]["relative_results"], 1)
->>> assert_length(results_bench["memory"]["raw_results"], 1)
->>> assert_if(results_bench["memory"]["max"] >= results_bench["memory"]["mean"])
+>>> assert_length(results_bench_memory["max_result_per_run_relative"], 1)
+>>> assert_length(results_bench_memory["max_result_per_run"], 1)
+>>> assert_length(results_bench_memory["relative_results"], 1)
+>>> assert_length(results_bench_memory["raw_results"], 1)
+>>> assert_if(results_bench_memory["max"] >= results_bench_memory["mean"])
 
 ```

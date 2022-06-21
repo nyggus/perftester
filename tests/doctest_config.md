@@ -29,17 +29,17 @@ You can read how to use `pt.config` [here](../docs/use_of_config.md). Below, you
 >>> pt.config.set_defaults("memory", number=100)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not number.
+perftest.perftest.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
 >>> pt.config.set_defaults("memory", number=100, repeat=5)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not number.
+perftest.perftest.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
 >>> pt.config.set_defaults("memory", repeat=5, number=100)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not number.
+perftest.perftest.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
 >>> pt.config.defaults = original_defaults
 
@@ -68,12 +68,12 @@ perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not 
 >>> pt.config.set(f, "memory", number=5)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not number.
+perftest.perftest.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
 >>> pt.config.set(f, "memory", number=5, repeat=10)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not number.
+perftest.perftest.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
 ```
 
@@ -83,19 +83,19 @@ perftest.perftest.ArgumentError: For memory tests, you can only set repeat, not 
 >>> pt.config.set(f, "memorys", repeat=5)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: Argument which must be str from among memory, time
+perftest.perftest.IncorrectArgumentError: Argument which must be str from among memory, time
 >>> pt.config.set(f, "times", repeat=5)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: Argument which must be str from among memory, time
+perftest.perftest.IncorrectArgumentError: Argument which must be str from among memory, time
 >>> pt.config.set_defaults(f, "memorys", repeat=5)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: Argument which must be str from among memory, time
+perftest.perftest.IncorrectArgumentError: Argument which must be str from among memory, time
 >>> pt.config.set_defaults(f, "times", repeat=5)
 Traceback (most recent call last):
     ...
-perftest.perftest.ArgumentError: Argument which must be str from among memory, time
+perftest.perftest.IncorrectArgumentError: Argument which must be str from among memory, time
 
 ```
 

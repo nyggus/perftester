@@ -13,7 +13,6 @@ python -m doctest use_of_config.md
 python -m doctest most_basic_use_memory.md
 python -m doctest README.md
 python -m doctest use_case_raw_time_testing.md
-python -m doctest use_of_limits.md
 python -m doctest change_benchmarking_function.md
 
 cd ../tests

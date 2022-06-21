@@ -8,7 +8,7 @@ call of a function. That way, the user can define tests without worrying of
 different settings: while the "number" argument in timeit functions affects
 the results, it does not so in perftest.
 
-Do remember that all lambda functions are stored as anonymous functions,
+Remember that all lambda functions are stored as anonymous functions,
 without a name. Hence it's better to avoid using lambdas in perftest.
 
 For the sake of pretty-printing the benchmarks, perftest comes with a pp
@@ -51,41 +51,30 @@ from statistics import mean
 class CLIPathError(Exception):
     """Exception class to be used for the CLI perftest app."""
 
-    pass
+
+class LogFilePathError(Exception):
+    """Exception class to be used when incorrect path is provided for a log file."""
 
 
-class PathError(Exception):
-    """Exception class to be used when incorrect path is provided."""
-
-    pass
+class LackingLimitsError(Exception):
+    """Exception class to be used when no limits are set for a test."""
 
 
-class ArgumentError(Exception):
+class IncorrectArgumentError(Exception):
     """Exception class to be used when function args are incorrect."""
 
-    pass
 
-
-class TimeError(Exception):
+class TimeTestError(Exception):
     """Exception class to be used when time_test() does not pass."""
 
-    pass
 
-
-class MemoryError(Exception):
+class MemoryTestError(Exception):
     """Exception class to be used when memory_usage_test() does not pass."""
-
-    pass
 
 
 class FunctionError(Exception):
     """Exception class to be used when the tested code throws an error."""
 
-    pass
-
-
-# Namedtuple to define time limits used in testing
-limits = namedtuple("limits", "raw_limit relative_limit")
 
 # Configuration
 
@@ -145,8 +134,7 @@ class Config:
         check_instance(
             value,
             int,
-            ArgumentError,
-            f"Argument value must be an int, not {type(value).__name__}"
+            message=f"Argument value must be an int, not {type(value).__name__}"
         )
         self._digits_for_printing = value
     
@@ -159,8 +147,7 @@ class Config:
         check_instance(
             value,
             bool,
-            ArgumentError,
-            f"Argument value must be an int, not {type(value).__name__}"
+            message=f"Argument value must be an int, not {type(value).__name__}"
         )
         self._log_to_file = value
     
@@ -173,7 +160,7 @@ class Config:
         path = Path(path)
         check_if_paths_exist(
             path.parent.absolute(),
-            PathError,
+            LogFilePathError,
             f"Argument path must be a valid path"
         )
         self._log_file = path
@@ -194,24 +181,25 @@ class Config:
 
         sys.tracebacklimit = None
 
-    def reload(self, which="both"):
-        """Reload built-in benchmarks.
+    def reload_time(self):
+        """Reload built-in time benchmarks.
 
         This is done so that a new relative test is run against a built-in
         benchmark that has just been ran, not some time ago.
-
-        Although the method enables you to reload both time and memory
-        benchmarks, the class never reloads memory benchmarks, as this is
-        not needed.
-
-        Args:
-            which (str): which benchmarks should be re-run? Can be "memory",
-                "time" or "both". Defaults to "both".
         """
-        if which in ("time", "both"):
-            self._benchmark_time()
-        if which in ("memory", "both"):
-            self._benchmark_memory()
+        self._benchmark_time()
+
+    def reload_memory(self):
+        """Reload built-in memory benchmarks.
+
+        This is done so that a new relative test is run against a built-in
+        benchmark that has just been ran, not some time ago.
+        
+        WARNING: This method is NOT used in normal circumstances because memory
+        usage checks do not change over time, so there is no need to update them.
+        You need to use this method only when you change the benchmark function.
+        """
+        self._benchmark_memory()
 
     def get_setting(self, func, which, item):
         """Get setting (number or repeat) for a function.
@@ -229,14 +217,14 @@ class Config:
         check_instance(
             func,
             Callable,
-            ArgumentError,
+            IncorrectArgumentError,
             message="Argument func must be a callable.",
         )
         check_argument(
             which,
             expected_type=str,
             expected_choices=whiches,
-            handle_with=ArgumentError,
+            handle_with=IncorrectArgumentError,
             message=(
                 "Argument which must be str from among "
                 f"{_str_iterable(whiches)}"
@@ -246,7 +234,7 @@ class Config:
             item,
             expected_type=str,
             expected_choices=items,
-            handle_with=ArgumentError,
+            handle_with=IncorrectArgumentError,
             message=(
                 "Argument item must be str from among "
                 f"{_str_iterable(items)}"
@@ -254,15 +242,20 @@ class Config:
         )
         check_if_not(
             which == "memory" and item == "number",
-            ArgumentError,
+            IncorrectArgumentError,
             "For memory tests, you can only set repeat, not number",
         )
 
         return self.settings.get(func, self.defaults).get(which).get(item)
 
     def benchmark_function(self):
-        """In-built function for benchmarking."""
-        return [i ** 2 for i in (1, 100, 1000)]
+        """In-built function for benchmarking.
+        
+        It's basically an empty function that does nothing, so it's cost
+        (time and memory) represent the cost of calling a function. Anything
+        more, thus, results from whatever the function is doing.
+        """
+        pass
 
     def _benchmark_time(self):
         """Run timeit.repeat for the in-built benchmark function.
@@ -288,13 +281,13 @@ class Config:
         """Run memory_profiler.memory_usage for the in-built benchmark function.
 
         Returns:
-            float: the minimum memory usage over time
+            float: the minimum maximum memory usage over time across all runs.
         """
         memory_results = [
             memory_usage((self.benchmark_function, (), {}))
             for _ in range(self.defaults["memory"]["repeat"])
         ]
-        self.memory_benchmark = min(min(r) for r in memory_results)
+        self.memory_benchmark = min(max(r) for r in memory_results)
 
     def set_defaults(self, which, number=None, repeat=None):
         """Change the default settings.
@@ -357,7 +350,7 @@ class Config:
         check_instance(
             func,
             Callable,
-            ArgumentError,
+            IncorrectArgumentError,
             message=(
                 "Argument func must be an int (or None), not "
                 f"{type(func).__name__}"
@@ -370,7 +363,7 @@ class Config:
                 which,
                 expected_type=str,
                 expected_choices=whiches,
-                handle_with=ArgumentError,
+                handle_with=IncorrectArgumentError,
                 message=(
                     "Argument which must be str from among "
                     f"{_str_iterable(whiches)}"
@@ -378,14 +371,14 @@ class Config:
             )
             check_if_not(
                 which == "memory" and number is not None,
-                ArgumentError,
+                IncorrectArgumentError,
                 "For memory tests, you can only set repeat, not number.",
             )
 
         check_instance(
             number,
             (int, None),
-            ArgumentError,
+            IncorrectArgumentError,
             message=(
                 "Argument number must be an int (or None), not "
                 f"{type(number).__name__}"
@@ -395,7 +388,7 @@ class Config:
         check_instance(
             repeat,
             (int, None),
-            ArgumentError,
+            IncorrectArgumentError,
             message=(
                 "Argument repeat must be an int (or None), not "
                 f"{type(repeat).__name__}"
@@ -448,44 +441,31 @@ def _repeat(func, *args, **kwargs):
     return [r / number for r in repeat_results]
 
 
-def time_test(func, time_limits, *args, **kwargs):
+def time_test(func, raw_limit, relative_limit, *args, **kwargs):
     """Run time performance test for func.
 
-    If time_limits is None, the function will report the execution times
-    along with their summaries. They can be used before running actual tests,
-    to understand the function's behavrio and define test limits for the
-    actual tests.
+    You need to provide either raw_limit or relative_limit, or both.
 
-    Note that if the function throws an error, so will time_test(), using the
-    FunctionError exception.
+    Note that if the tested function throws an error, so will time_test(),
+    which will raise the FunctionError exception.
 
     Param:
         func (Callable): a function (or any callable) to be tested; passed
             to timeit.repeat
-        time_limits (limits): an instance of namedtupe limits, with raw_limit
-            and relative_limit attributes. The former is the maximum time
-            that test can take; if it's exceeded, the test does not pass.
-            The latter is used for relative benchmarking (against a standard
-            function defined in the config); if time_limits is None,
-            the function will simply provide the execution times, which can
-            be used to define the limits to be used in testing
+        raw_limit (float): raw limit for the test. It is the maximum time
+            that a single run of the function can take; if it's exceeded,
+            the test does not pass.
+        relative_limit (float): relative limit for the test. It is used for
+            relative testing (against a standard function defined in the
+            config)
         args, kwargs: arguments passed to func
 
     Return:
-        when time_limits is None, a dict:
-            'raw_times': all the received times (from each repeat)
-            'raw_times_relative': all the received times (from each repeat),
-                divided by config.benchmark_time
-            'min': the minimum time (from the repeats)
-            'mean': mean times
-            'max': the maximum time
-            'max_relative': the maximum time, divided by config.benchmark_time
-        when time_limits is not None:
-            Nothing when the test passes; TimeError is raised otherwise
-            (it then provides the limit and the measured time)
+        Nothing when the test passes; TimeTestError is raised otherwise
+        (it then provides the limit and the measured time)
 
     >>> def f(n): return list(range(n))
-    >>> first_run = time_test(f, None, n=10)
+    >>> first_run = time_benchmark(f, n=10)
 
     Note that this should have added the function to the config:
     >>> config.settings.keys() #doctest: +ELLIPSIS
@@ -496,11 +476,11 @@ def time_test(func, time_limits, *args, **kwargs):
     First, let's conduct only raw tests, comparing raw execution times (in sec).
     >>> first_run['min']  < 1e-05
     True
-    >>> time_test(f, limits(1e-04, None), n=1000)
-    >>> time_test(f, limits(1e-10, None), n=1000) #doctest: +ELLIPSIS
+    >>> time_test(f, 1e-04, None, n=1000)
+    >>> time_test(f, 1e-10, None, n=1000) #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftest.TimeError: Time test not passed for function f:
+    perftest.TimeTestError: Time test not passed for function f:
     raw_limit = 1e-10
     minimum run time = ...
 
@@ -510,16 +490,16 @@ def time_test(func, time_limits, *args, **kwargs):
     machine. You use it so in the following way (which here means that the
     tested function should not be slower than the benchmark time from config -
     that's why 1 in limits):
-    >>> time_test(f, limits(None, 1), n=10) #doctest: +ELLIPSIS
+    >>> time_test(f, None, 1, n=10) #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftest.TimeError: Time test not passed for function f:
+    perftest.TimeTestError: Time test not passed for function f:
     relative_limit = 1
     minimum time ratio = ...
 
     In our case, the test does not passes (correctly). It will surely pass if we use
     a factor of 10:
-    >>> time_test(f, limits(None, 10), n=10)
+    >>> time_test(f, None, 10, n=10)
 
     This approach based on relative becnhmarks is usuallyt what you want to
     use, since it does not use with direct time (which depends on the machine).
@@ -528,86 +508,41 @@ def time_test(func, time_limits, *args, **kwargs):
     config), run in the same machine in which the test is run.
 
     Let's see if the tested function is ten times quicker than the bechmark (it is not):
-    >>> time_test(f, limits(None, .1), n=10)  #doctest: +ELLIPSIS
+    >>> time_test(f, None, .1, n=10)  #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftest.TimeError: Time test not passed for function f:
+    perftest.TimeTestError: Time test not passed for function f:
     relative_limit = 0.1
     minimum time ratio = ...
 
-    Of course, we do have to remember that the execution time can depend on
-    the function's arguments:
-    >>> time_test(f, None, n=1000)["min"] > time_test(f, None, n=1)["min"]
-    True
     """
-    check_instance(
-        func,
-        Callable,
-        ArgumentError,
-        message="Argument func must be a callable.",
+    check_if_not(
+        raw_limit is None and relative_limit is None,
+        LackingLimitsError,
+        message="You must provide raw_limit, relative_limit or both"        
     )
-    check_instance(
-        time_limits,
-        (None, tuple),
-        ArgumentError,
-        message="Argument time_limits must be a namedtuple (or None)",
-    )
-    if time_limits is None:
-        raw_limit, relative_limit = None, None
-    else:
-        try:
-            raw_limit, relative_limit = time_limits
-        except AttributeError:
-            raise ArgumentError(
-                "Argument time_limits must be a namedtuple (or None)"
-            )
+    _add_func_to_config(func)
 
-    if func not in config.settings.keys():
-        _add_func_to_config(func)
-
-    try:
-        results = _repeat(func, *args, **kwargs)
-    except Exception as e:
-        raise FunctionError(
-            f"The tested function raised {type(e).__name__}: {str(e)}"
-        )
-
-    min_result = min(results)
-
-    # Reload built-in benchmarks
-    config.reload("time")
-
-    # In case of initial run (not a test per se):
-    if raw_limit is None and relative_limit is None:
-        return {
-            "min": min_result,
-            "min_relative": min_result / config.time_benchmark,
-            "raw_times": results,
-            "raw_times_relative": [
-                result / config.time_benchmark for result in results
-            ],
-            "mean": mean(results),
-            "max": max(results),
-        }
-
+    results = time_benchmark(func, *args, **kwargs)
+    
     # Test raw_limit
     if raw_limit is not None:
         check_if(
-            min_result <= raw_limit,
-            handle_with=TimeError,
+            results["min"] <= raw_limit,
+            handle_with=TimeTestError,
             message=(
                 f"Time test not passed for function {func.__name__}:\n"
                 f"raw_limit = {raw_limit}\n"
-                f"minimum run time = {rounder.signif(min_result, config.digits_for_printing)}"
+                f"minimum run time = {rounder.signif(results['min'], config.digits_for_printing)}"
             ),
         )
 
     # Test the relative time (against the benchmark function)
     if relative_limit is not None:
-        ratio_time = min_result / config.time_benchmark
+        ratio_time = results["min"] / config.time_benchmark
         check_if(
             ratio_time <= relative_limit,
-            handle_with=TimeError,
+            handle_with=TimeTestError,
             message=(
                 f"Time test not passed for function {func.__name__}:\n"
                 f"relative_limit = {relative_limit}\n"
@@ -616,14 +551,24 @@ def time_test(func, time_limits, *args, **kwargs):
         )
 
 
-def memory_usage_test(func, memory_limits=None, *args, **kwargs):
+def memory_usage_test(func, raw_limit, relative_limit, *args, **kwargs):
     """Test memory usage of a function.
-    If memory_limits is not provided, the function determines this usage,
-    using memory_profiler.memory_usage(). This can be done to check the actual
-    memory use. These results can then be used to define memory_limits for
-    testing the function.
+    
+    You can run a test based on a raw limit for the time of executing
+    of the function (this is a time per single run); then use raw_limit to
+    provide the limit and relative_limit=None. You can use relative_limit to set up
+    a limit for a relative test (against a function defined in the config);
+    then use raw_limit=None. But you can also use both at the same time, and
+    the tests passes only when both the raw and the relative tests pass.
+    
     Args:
         func (Callable): the tested function.
+        raw_limit (float): raw limit for the test. It is the maximum memory
+            that the function can use; if it's exceeded, the test does not pass.
+        relative_limit (float): relative limit for the test. It is used for
+            relative testing (against a standard function defined in the
+            config)
+        
         memory_limits (limits): an instance of namedtupe limits, with
             raw_limit and relative_limit attributes. The former is the maximum
             memory that function can use; if it's exceeded, the test does not
@@ -646,38 +591,77 @@ def memory_usage_test(func, memory_limits=None, *args, **kwargs):
             Nothing when the test passes; PerftestError is raised otherwise
             (it then provides the limit and the measured memory usage)
     >>> def sum1(n): return sum([i**2 for i in range(n)])
-    >>> first_run = memory_usage_test(sum1, n=100_000)
+    >>> first_run = memory_usage_benchmark(sum1, n=100_000)
     >>> first_run.keys()
     dict_keys(['raw_results', 'relative_results', 'mean_result_per_run', 'max_result_per_run', 'max_result_per_run_relative', 'mean', 'max', 'max_relative'])
     >>> type(first_run['raw_results'])
     <class 'list'>
     >>> first_run['mean'] < first_run['max']
     True
-    >>> memory_usage_test(sum1, limits(first_run['max']*2, None), n=100_000)
+    >>> memory_usage_test(sum1, first_run['max']*2, None, n=100_000)
     """
     check_instance(
-        func, Callable, ArgumentError, "Argument func must be a callable."
+        func, Callable, IncorrectArgumentError, "Argument func must be a callable."
     )
-
-    check_instance(
-        memory_limits,
-        (None, tuple),
-        ArgumentError,
-        "Argument memory_limits must be a tuple (or None)",
+    check_if_not(
+        raw_limit is None and relative_limit is None,
+        LackingLimitsError,
+        message="You must provide raw_limit, relative_limit or both"        
     )
-    if memory_limits is None:
-        raw_limit, relative_limit = None, None
-    else:
-        try:
-            raw_limit, relative_limit = memory_limits
-        except AttributeError:
-            raise ArgumentError(
-                "Argument memory_limits must be a namedtuple (or None)"
-            )
+    results = memory_usage_benchmark(func, *args, **kwargs)
+    
+    if raw_limit is not None:
+        check_if(
+            results["max"] <= raw_limit,
+            handle_with=MemoryTestError,
+            message=(
+                f"Memory test not passed for function {func.__name__}:\n"
+                f"memory_limit = {raw_limit}\n"
+                f"maximum memory usage = {rounder.signif(results['max'], config.digits_for_printing)}"
+            ),
+        )
+    if relative_limit is not None:
+        relatve_got_memory = results["max"] / config.memory_benchmark
+        check_if(
+            relatve_got_memory <= relative_limit,
+            handle_with=MemoryTestError,
+            message=(
+                f"Memory test not passed for function {func.__name__}:\n"
+                f"relative memory limit = {relative_limit}\n"
+                f"maximum obtained relative memory usage = {rounder.signif(relatve_got_memory, config.digits_for_printing)}"
+            ),
+        )
 
-    if func not in config.settings.keys():
-        _add_func_to_config(func)
 
+def memory_usage_benchmark(func, *args, **kwargs):
+    """Run memory benchmarks for a callable.
+
+    It offers an easy way to run benchmarks before defining limits in
+    memory_usage_test(). The benchmarks use the settings from config for func,
+    or defaults if this function has no settings yet. Note that after
+    running the benchmark function for a function, this function will
+    be added to config.settings.
+
+    The function returns a dict that you can pretty-print using function pp().
+
+    Args:
+        func (Callable): a function (or a callable) to run benchmarks for
+        *args, **kwargs: arguments passed to func
+
+    Returns:
+        dict: a dictionary with results returned by time_test() and
+            memory_usage_test()
+
+    >>> def f(x): return x
+    >>> f_bench = memory_usage_benchmark(f, x=10)
+    >>> f_bench.keys()
+    dict_keys(['raw_results', 'relative_results', 'mean_result_per_run', 'max_result_per_run', 'max_result_per_run_relative', 'mean', 'max', 'max_relative'])
+    """
+    check_instance(func, Callable, message="Argument func must be a callable.")
+    
+    _add_func_to_config(func)
+    
+    
     try:
         memory_results = [
             memory_usage((func, args, kwargs))
@@ -693,58 +677,33 @@ def memory_usage_test(func, memory_limits=None, *args, **kwargs):
     overall_mean = mean(memory_results_mean)
     # We take the min of the max values
     overall_max = min(memory_results_max)
-
+    
     relative_results = copy.deepcopy(memory_results)
     for i, result in enumerate(relative_results):
         for j, r in enumerate(result):
             relative_results[i][j] = r / config.memory_benchmark
-    if memory_limits is None:
-        return {
-            "raw_results": memory_results,
-            "relative_results": relative_results,
-            "mean_result_per_run": memory_results_mean,
-            "max_result_per_run": memory_results_max,
-            "max_result_per_run_relative": [
-                r / config.memory_benchmark for r in memory_results_max
-            ],
-            "mean": overall_mean,
-            "max": overall_max,
-            "max_relative": overall_max / config.memory_benchmark,
-        }
-    if raw_limit is not None:
-        check_if(
-            overall_max <= raw_limit,
-            handle_with=MemoryError,
-            message=(
-                f"Memory test not passed for function {func.__name__}:\n"
-                f"memory_limit = {raw_limit}\n"
-                f"maximum memory usage = {rounder.signif(overall_max, config.digits_for_printing)}"
-            ),
-        )
-    if relative_limit is not None:
-        relatve_got_memory = overall_max / config.memory_benchmark
-        check_if(
-            relatve_got_memory <= relative_limit,
-            handle_with=MemoryError,
-            message=(
-                f"Memory test not passed for function {func.__name__}:\n"
-                f"relative memory limit = {relative_limit}\n"
-                f"maximum obtained relative memory usage = {rounder.signif(relatve_got_memory, config.digits_for_printing)}"
-            ),
-        )
+    return {
+        "raw_results": memory_results,
+        "relative_results": relative_results,
+        "mean_result_per_run": memory_results_mean,
+        "max_result_per_run": memory_results_max,
+        "max_result_per_run_relative": [
+            r / config.memory_benchmark for r in memory_results_max
+        ],
+        "mean": overall_mean,
+        "max": overall_max,
+        "max_relative": overall_max / config.memory_benchmark,
+    }
 
 
-def benchmark(func, *args, **kwargs):
-    """Run time and memory benchmarks for a function (or a callable).
+def time_benchmark(func, *args, **kwargs):
+    """Run time benchmarks for a callable.
 
-    The benchmarks are run through time_test() and memory_usage_test(),
-    with time_limits and memory_limits set to None, so the function is a
-    wrapper around these two functions. It offers an easy way to run
-    benchmarks (also in an interactive session) before defining limits in
-    tests. The benchmarks use the settings from config for func, or defaults
-    if this function has no settings yet. Note that after running the
-    benchmark function for a function, this function will be added to
-    config.settings.
+    It offers an easy way to run benchmarks before defining limits in
+    time_test(). The benchmarks use the settings from config for func,
+    or defaults if this function has no settings yet. Note that after
+    running the benchmark function for a function, this function will
+    be added to config.settings.
 
     The function returns a dict that you can pretty-print using function pp().
 
@@ -753,27 +712,53 @@ def benchmark(func, *args, **kwargs):
         *args, **kwargs: arguments passed to func
 
     Returns:
-        dict: a dictionary with results returned by time_test() and
-            memory_usage_test()
+        dict:
+            'raw_times': all the received times (from each repeat)
+            'raw_times_relative': all the received times (from each repeat),
+                divided by config.benchmark_time
+            'min': the minimum time (from the repeats)
+            'mean': mean times
+            'max': the maximum time
+            'max_relative': the maximum time, divided by config.benchmark_time
 
     >>> def f(x): return x
-    >>> f_bench = benchmark(f, x=10)
+    >>> f_bench = time_benchmark(f, x=10)
     >>> f_bench.keys()
-    dict_keys(['time', 'memory'])
-
-    >>> f_bench["time"].keys()
     dict_keys(['min', 'min_relative', 'raw_times', 'raw_times_relative', 'mean', 'max'])
+    
+    Of course, we do have to remember that the execution time can depend on
+    the function's arguments:
+    >>> def f(n): return list(range(n))
+    >>> time_benchmark(f, n=1000)["min"] > time_benchmark(f, n=1)["min"]
+    True
 
-    >>> f_bench["memory"].keys()
-    dict_keys(['raw_results', 'relative_results', 'mean_result_per_run', 'max_result_per_run', 'max_result_per_run_relative', 'mean', 'max', 'max_relative'])
     """
     check_instance(func, Callable, message="Argument func must be a callable.")
-    config.reload("time")
-    results = dict()
-    results["time"] = time_test(func, None, *args, **kwargs)
-    # config.reload("memory")
-    results["memory"] = memory_usage_test(func, None, *args, **kwargs)
-    return results
+    
+    _add_func_to_config(func)
+    
+    try:
+        results = _repeat(func, *args, **kwargs)
+    except Exception as e:
+        raise FunctionError(
+            f"The tested function raised {type(e).__name__}: {str(e)}"
+        )
+
+    min_result = min(results)
+
+    # Reload built-in benchmarks
+    config.reload_time()
+
+    return {
+        "min": min_result,
+        "min_relative": min_result / config.time_benchmark,
+        "raw_times": results,
+        "raw_times_relative": [
+            result / config.time_benchmark for result in results
+        ],
+        "mean": mean(results),
+        "max": max(results),
+    }
 
 
 def pp(*args):
