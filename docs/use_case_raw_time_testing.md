@@ -63,6 +63,6 @@ We can safely expect that `f()` should not take much more than `0.1`. For many f
 So, we're ready to build our tests:
 
 ```python
->>> pt.time_test(f, 0.101, None, x=10, y=10)
+>>> pt.time_test(f, raw_limit=0.101, x=10, y=10)
 
 ```

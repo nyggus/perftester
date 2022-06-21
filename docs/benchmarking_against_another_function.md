@@ -28,7 +28,7 @@ Let's check the performance of both functions for large `n`, for which the way m
 
 ```python
 >>> import perftest as pt
->>> pt.config.set_defaults("time", number=10, repeat=1) # change defaults - both functions will use these settings
+>>> pt.config.set_defaults("time", number=25, repeat=3) # change defaults - both functions will use these settings
 >>> n_for_comparison = 10_000_000
 
 # Actual benchmarks
@@ -119,7 +119,6 @@ OK, we have our benchmarks, so we can set up limits for both time and memory tes
 >>> pt.time_test(
 ...    f2,
 ...    raw_limit=3 * f_performance_time["min"],
-...    relative_limit=None,
 ...    n=n_for_comparison
 ... )
 
@@ -131,7 +130,6 @@ Often, however, you will not run such benchmarks before running tests, so in act
 >>> pt.time_test(
 ...    f2,
 ...    raw_limit=3 * pt.time_benchmark(f, n=n_for_comparison)["min"],
-...    relative_limit=None,
 ...    n=n_for_comparison
 ... )
 
@@ -147,8 +145,7 @@ Basically, we're doing the same thing, but for memory. When we analyzed the benc
 ```python
 >>> pt.memory_usage_test(
 ...    f2,
-...    f_performance_memory["max"] / 6,
-...    None,
+...    raw_limit=f_performance_memory["max"] / 6,
 ...    n=n_for_comparison
 ... )
 
@@ -159,12 +156,10 @@ and here is a direct version, running both tests with one command:
 ```python
 >>> pt.memory_usage_test(
 ...    f2,
-...    pt.memory_usage_benchmark(f, n=n_for_comparison)["max"] / 6,
-...    None,
+...    raw_limit=pt.memory_usage_benchmark(f, n=n_for_comparison)["max"] / 6,
 ...    n=n_for_comparison
 ... )
 
 ```
-
 
 > Note that while for `time_test()` we used `["min"]`, for `memory_usage_test` we have to use `["max"]`, as we are benchmarking against the maximum RAM used throughout the time of executing the function.

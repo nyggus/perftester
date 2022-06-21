@@ -30,7 +30,7 @@ perftest.perftest.TimeTestError
 >>> import time
 >>> def f(): time.sleep(.1)
 >>> pt.config.set(f, "time", number=1, repeat=1)
->>> pt.time_test(f, .001, None) #doctest: +ELLIPSIS
+>>> pt.time_test(f, raw_limit=.001) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function f:
@@ -38,7 +38,7 @@ raw_limit = ...
 minimum run time = ...
 
 >>> pt.config.full_traceback()
->>> pt.time_test(f, .001, None) #doctest: +ELLIPSIS
+>>> pt.time_test(f, raw_limit=.001) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function f:
@@ -50,7 +50,7 @@ minimum run time = ...
 And this is the actual output you would see in your console; I removed most of the paths, and of course, you could get a slightly different `minimum run time`:
 
 ```python
-# pt.time_test(f, (.001, None))
+# pt.time_test(f, raw_limit=.001)
 perftest.perftest.TimeTestError: Time test not passed for function f:
 raw_limit = 0.001
 minimum run time = 0.10100129999773344
@@ -58,7 +58,7 @@ minimum run time = 0.10100129999773344
 
 ```python
 # pt.config.full_traceback()
-# pt.time_test(f, (.001, None))
+# pt.time_test(f, raw_limit=.001)
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
   File .../perftest.py", line 510, in time_test

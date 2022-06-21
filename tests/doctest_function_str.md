@@ -24,12 +24,12 @@ A function to be tested (just a function with some string manipulations, nothing
 Note that when an exception is raised from the tested function, the `perftest` functions will throw the `perftest.FunctionError` error, which will contain the original error, too:
 
 ```python
->>> pt.time_test(preprocess, 1, None, 123)
+>>> pt.time_test(preprocess, 123, raw_limit=1)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
->>> pt.memory_usage_test(preprocess, 1, None, 123)
+>>> pt.memory_usage_test(preprocess, 123, raw_limit=1)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
@@ -60,18 +60,18 @@ True
 ## Testing `time_test()` function
 
 ```python
->>> results_time = pt.time_test(preprocess, 1, None, "123")
+>>> results_time = pt.time_test(preprocess, "123", raw_limit=1)
 
->>> results_time = pt.time_test(preprocess, None, 10, "123")
+>>> results_time = pt.time_test(preprocess, "123", relative_limit=10)
 
 ```
 
 ##  Testing `memory_usage_test()` function
 
 ```python
->>> results_memory = pt.memory_usage_test(preprocess, 20, None, "123")
+>>> results_memory = pt.memory_usage_test(preprocess, "123", raw_limit=20)
 
->>> results_memory = pt.memory_usage_test(preprocess, None, 3, "123")
+>>> results_memory = pt.memory_usage_test(preprocess, "123", relative_limit=3)
 
 ```
 

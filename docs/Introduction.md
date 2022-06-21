@@ -120,14 +120,14 @@ Note that list `"raw_times"` contains mean values per single run of the function
 We're ready to define test limits. Of course, they should be a little higher than those obtained in the above benchmarks. Do remember that these results depend also on all the other processes your machine is running.
 
 ```python
->>> pt.time_test(f, 6e-05, None, n=1000)
+>>> pt.time_test(f, raw_limit=6e-05, n=1000)
 
 ```
 
 Running the above test should return nothing and throw nothing. Like with `pytest`s and `doctest`s, this means that the test has passed. If a test fails (below it will, because we will make the raw time limit an unrealistic zero), the following happens:
 
 ```python
->>> pt.time_test(f, 0, None, n=1000) #doctest: +ELLIPSIS
+>>> pt.time_test(f, raw_limit=0, n=1000) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function f:
@@ -144,7 +144,7 @@ minimum run time = ...
 A relative time-related test can look like this:
 
 ```python
->>> pt.time_test(f, None, 700, n=1000)
+>>> pt.time_test(f, relative_limit=700, n=1000)
 
 ```
 
@@ -161,8 +161,8 @@ However, you can compare the relative results between functions. Consider anothe
 And now let's run the same test, but with a smaller `n` (to save time in `doctest`s):
 
 ```python
->>> pt.time_test(f, None, 9, n=10)
->>> pt.time_test(f2, None, 9, n=10) #doctest: +ELLIPSIS
+>>> pt.time_test(f, relative_limit=9, n=10)
+>>> pt.time_test(f2, relative_limit=9, n=10) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.TimeTestError: Time test not passed for function f2:
@@ -265,8 +265,8 @@ So, although `array.array` uses far less memory, it does take a little more time
 Like with `time_test`, you can also use relative testing:
 
 ```python
->>> pt.memory_usage_test(f2, None, 5, n=10_000_000)
->>> pt.memory_usage_test(f, None, 2, n=10_000_000) #doctest: +ELLIPSIS
+>>> pt.memory_usage_test(f2, relative_limit=5, n=10_000_000)
+>>> pt.memory_usage_test(f, relative_limit=2, n=10_000_000) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function f:

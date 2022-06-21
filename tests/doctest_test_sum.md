@@ -4,12 +4,12 @@ Catch exceptions:
 
 ```python
 >>> import perftest as pt
->>> pt.time_test(sum, 1, None, "this cannot be summed up")
+>>> pt.time_test(sum, "this cannot be summed up", raw_limit=1)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
->>> pt.memory_usage_test(sum, 1, None, "this cannot be summed up")
+>>> pt.memory_usage_test(sum, "this cannot be summed up", raw_limit=1)
 Traceback (most recent call last):
     ...
 perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
@@ -53,9 +53,8 @@ If you run the function `sum` once, you will do it quicker than when you do it t
 >>> for n in n_set:
 ...    for _ in range(n_of_test_repeats):
 ...        pt.time_test(sum,
-...                     time_sum_perf_twice[n]["min"],
-...                     None,
-...                     range(n))
+...                     range(n),
+...                     raw_limit=time_sum_perf_twice[n]["min"])
 
 ```
 
@@ -67,9 +66,8 @@ In terms of memory, this should not have any effect, so clearly one of the below
 >>> for n in n_set:
 ...    for _ in range(n_of_test_repeats):
 ...        pt.memory_usage_test(sum,
-...                             memory_sum_perf_twice[n]["max"],
-...                             None,
-...                             range(n)) #doctest: +ELLIPSIS
+...                             range(n),
+...                             raw_limit=memory_sum_perf_twice[n]["max"]) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
 perftest.perftest.MemoryTestError: Memory test not passed for function sum:

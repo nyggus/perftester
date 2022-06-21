@@ -11,4 +11,4 @@ pt.config.set(f2, "time", number=1, repeat=2)
 
 
 def perftest_f():
-    pt.time_test(f2, pt.limits(0.051, None))
+    pt.time_test(f2, raw_limit=0.051)
