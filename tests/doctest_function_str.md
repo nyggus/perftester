@@ -69,7 +69,7 @@ True
 ##  Testing `memory_usage_test()` function
 
 ```python
->>> results_memory = pt.memory_usage_test(preprocess, "123", raw_limit=20)
+>>> results_memory = pt.memory_usage_test(preprocess, "123", raw_limit=27)
 
 >>> results_memory = pt.memory_usage_test(preprocess, "123", relative_limit=3)
 

@@ -40,7 +40,7 @@ Let's run the function with `None` limits, to check its performance:
 We can define a simple memory use test, using raw values, as follows:
 
 ```python
->>> pt.memory_usage_test(sum_of_squares, raw_limit=500, x=x)
+>>> pt.memory_usage_test(sum_of_squares, raw_limit=800, x=x)
 
 ```
 

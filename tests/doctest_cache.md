@@ -28,7 +28,7 @@ Let's benchmark both functions:
 Definitely, and as expected, the cached version takes a lot less time:
 
 ```python
->>> time_no_cache["min"] / time_with_cache["min"] > 90
+>>> time_no_cache["min"] / time_with_cache["min"] > 50
 True
 
 ```

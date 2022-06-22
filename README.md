@@ -2,7 +2,8 @@
 
 ## Pre-introduction: TL;DR
 
-At the most basic level, using `perftest` is simple. It offers you two functions for benchmarking (one for execution time and one for memory), and two functions for performance testing (likewise).
+At the most basic level, using `perftest` is simple. It offers you two functions for benchmarking (one for execution time and one for memory), and two functions for performance testing (likewise). Read below for a very short introduction of them. If you want to learn more, however, do not stop there, but read on.
+
 
 ### Benchmarking
 
@@ -52,13 +53,15 @@ The API of `perftest` tests is very similar to benchmarks, the only difference b
 
 ```python
 # A raw test
->>> pt.time_test(foo, raw_limit=7.e-07, x=129, n=100)
+>>> pt.time_test(foo, raw_limit=9.e-07, x=129, n=100)
 
 # A relative test
 >>> pt.time_test(foo, relative_limit=7, x=129, n=100)
 
 # A raw test
->>> pt.memory_usage_test(foo, raw_limit=18, x=129, n=100)
+# Some raw tests are unrealistic for Linux, as they are suitable for Windows,
+# in which Python uses significantly less memory.
+>>> pt.memory_usage_test(foo, raw_limit=25, x=129, n=100)
 
 # A relative test
 >>> pt.memory_usage_test(foo, relative_limit=1.01, x=129, n=100)
@@ -72,6 +75,7 @@ You can, certainly, use `Repeat` and `Number`:
 
 ```
 
+You can use these testing functions in `pytest`, or in dedicated `doctest` files. You can, however, use `perftest` as a separate performance testing framework. Read on to learn more about that. What's more, `perftest` offers more functionalities, and a `config` object that offers you much more control of testing.
 
 ## Introduction
 
@@ -249,21 +253,21 @@ This stands for
 Like before, we can use `Number` and `Repeat` arguments:
 
 ```python
->>> pt.time_test(func=f, raw_limit=2e-05, n=100, Number=10)
+>>> pt.time_test(func=f, raw_limit=3e-05, n=100, Number=10)
 
 ```
 
 Now, let's define a relative time test:
 
 ```python
->>> pt.time_test(f, relative_limit=170, n=100)
+>>> pt.time_test(f, relative_limit=230, n=100)
 
 ```
 
 We also can combine both:
 
 ```python
->>> pt.time_test(f, raw_limit=2e-05, relative_limit=170, n=100)
+>>> pt.time_test(f, raw_limit=2e-05, relative_limit=230, n=100)
 
 ```
 
@@ -275,9 +279,9 @@ Relative tests test the function's performance against the time that a built-in 
 Memory tests use `pt.memory_usage_test()` function, which is used in the same way as `pt.time_test()`:
 
 ```python
->>> pt.memory_usage_test(f, raw_limit=20, n=100) # test on raw memory
+>>> pt.memory_usage_test(f, raw_limit=27, n=100) # test on raw memory
 >>> pt.memory_usage_test(f, relative_limit=1.01, n=100) # relative time test
->>> pt.memory_usage_test(f, raw_limit=20, relative_limit=1.01, n=100) # both
+>>> pt.memory_usage_test(f, raw_limit=27, relative_limit=1.01, n=100) # both
 
 ```
 
