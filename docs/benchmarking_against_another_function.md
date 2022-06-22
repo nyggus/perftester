@@ -118,7 +118,7 @@ OK, we have our benchmarks, so we can set up limits for both time and memory tes
 ```python
 >>> pt.time_test(
 ...    f2,
-...    raw_limit=3 * f_performance_time["min"],
+...    raw_limit=4*f_performance_time["min"],
 ...    n=n_for_comparison
 ... )
 
@@ -129,7 +129,7 @@ Often, however, you will not run such benchmarks before running tests, so in act
 ```python
 >>> pt.time_test(
 ...    f2,
-...    raw_limit=3 * pt.time_benchmark(f, n=n_for_comparison)["min"],
+...    raw_limit=4*pt.time_benchmark(f, n=n_for_comparison)["min"],
 ...    n=n_for_comparison
 ... )
 

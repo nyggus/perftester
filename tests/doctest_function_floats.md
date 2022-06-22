@@ -124,7 +124,7 @@ For such small lists, memory should not be a problem, and we can assume that all
 
 ```python
 >>> max_memories = [v["max_relative"] for v in (var_perf_memory, var_perf_2_memory, var_perf_3_memory, var_perf_4_memory)] 
->>> all(memory >= 1 and memory < 1.02 for memory in max_memories)
+>>> all(memory >= .99 and memory < 1.03 for memory in max_memories)
 True
 
 ```
