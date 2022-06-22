@@ -9,7 +9,7 @@ extras_requirements = {
 
 setuptools.setup(
     name="perftest",
-    version="0.2.2",
+    version="0.2.3",
     author="Nyggus",
     author_email="nyggus@gmail.com",
     description="Lightweight performance testing in Python",
@@ -23,7 +23,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=["easycheck", "rounder", "memory_profiler==0.60.0"],
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     extras_require=extras_requirements,
     entry_points={"console_scripts": ["perftest = perftest.__main__:main"]},
 )
