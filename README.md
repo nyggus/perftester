@@ -40,8 +40,9 @@ These calls do not change the default settings so you use the arguments' values 
 > Some of you may wonder why the `Number` and `Repeat` arguments violate what we can call the Pythonic style, by using a capital first letter for function arguments. The reason is simple: I wanted to minimize a risk of conflicts that would happen when benchmarking (or testing) a function with any of the arguments `number` or `repeat` (or both). A chance that a Python function will have a `Number` or a `Repeat` argument is rather small. If that happens, however, you can use `functools.partial()` to overcome the problem:
 
 ```python
-def bar(Number, Repeat): return [Number] * Repeat
 from functools import partial
+
+def bar(Number, Repeat): return [Number] * Repeat
 bar_p = partial(bar, Number=129, Repeat=100)
 pt.time_benchmark(bar_p, Number=100, Repeat=2)
 ```
