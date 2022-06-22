@@ -74,7 +74,7 @@ def _log(message):
 
 
 def _import_settings_from_config_file():
-    settings_file = config.log_file
+    settings_file = config.config_file
     if settings_file.exists():
         sys.path.append(str(settings_file.parent.absolute()))
         importlib.import_module("config_perftester")
@@ -102,7 +102,7 @@ def _initialize_log_file(files_len):
         "perftester: https://github.com/nyggus/perftester\n"
         "--------------------------------------------"
         f"\n\nCollected {files_len} "
-        "perftester modules for testing.\n"
+        f"perftester module{'s' if files_len > 1 else ''} for testing.\n"
     )
 
 
