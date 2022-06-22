@@ -1,5 +1,5 @@
-"""This module is used for testing the perftest CLI program."""
-import perftest as pt
+"""This module is used for testing the perftester CLI program."""
+import perftester as pt
 import time
 
 
@@ -10,5 +10,5 @@ def f2():
 pt.config.set(f2, "time", number=1, repeat=2)
 
 
-def perftest_f():
+def perftester_f():
     pt.time_test(f2, raw_limit=0.051)

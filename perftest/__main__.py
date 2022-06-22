@@ -1,4 +1,4 @@
-"""Module responsible for the CLI perftest command."""
+"""Module responsible for the CLI perftester command."""
 import importlib
 import inspect
 import os
@@ -6,7 +6,7 @@ import pathlib
 import sys
 from collections import namedtuple
 from easycheck import check_if_paths_exist
-from perftest import config, TimeTestError, MemoryTestError, CLIPathError
+from perftester import config, TimeTestError, MemoryTestError, CLIPathError
 
 
 TestResults = namedtuple("TestResults", "passed_tests failed_tests")
@@ -18,22 +18,22 @@ def main():
     files = _read_cli_args()
     _initialize_log_file(len(files))
     _import_settings_from_config_file()
-    passed_perftests, failed_perftests = [], []
+    passed_perftesters, failed_perftesters = [], []
 
     for file in files:
         module, module_name = _import_module(file)
-        perftest_functions = _find_perftest_functions(module)
-        for func in perftest_functions:
-            this_test = _perftest(module_name, func)
+        perftester_functions = _find_perftester_functions(module)
+        for func in perftester_functions:
+            this_test = _perftester(module_name, func)
             if this_test:
-                failed_perftests.append(f"{str(module_name)}.{func.__name__}")
+                failed_perftesters.append(f"{str(module_name)}.{func.__name__}")
             else:
-                passed_perftests.append(f"{str(module_name)}.{func.__name__}")
+                passed_perftesters.append(f"{str(module_name)}.{func.__name__}")
 
     test_results = TestResults(
-        passed_tests=passed_perftests, failed_tests=failed_perftests
+        passed_tests=passed_perftesters, failed_tests=failed_perftesters
     )
-    _log_perftest_results(test_results)
+    _log_perftester_results(test_results)
 
 
 def _read_cli_args():
@@ -43,10 +43,10 @@ def _read_cli_args():
         # sys.argv[1] is always a string, so no need to check it
         path = pathlib.Path(sys.argv[1])
     check_if_paths_exist(
-        path, CLIPathError, "Incorrent path provided with perftest CLI command"
+        path, CLIPathError, "Incorrent path provided with perftester CLI command"
     )
     if path.is_dir():
-        files = _find_perftest_files(path)
+        files = _find_perftester_files(path)
     elif path.is_file:
         files = [
             path,
@@ -68,7 +68,7 @@ def _log(message):
         except OSError as e:
             print(
                 f"Error in writing to {config.log_file}: {e}. "
-                "Perftest log will not be saved there."
+                "perftester log will not be saved there."
             )
             config.log_to_file = False
 
@@ -77,11 +77,11 @@ def _import_settings_from_config_file():
     settings_file = config.log_file
     if settings_file.exists():
         sys.path.append(str(settings_file.parent.absolute()))
-        importlib.import_module("config_perftest")
+        importlib.import_module("config_perftester")
         _log(f"Importing settings from {settings_file}.")
     else:
         _log(
-            "No settings file detected, using default perftest configuration."
+            "No settings file detected, using default perftester configuration."
         )
 
 
@@ -93,16 +93,16 @@ def _initialize_log_file(files_len):
         except OSError as e:
             print(
                 f"Error in writing to {config.log_file}: {e}. "
-                "Perftest log will not be saved there."
+                "perftester log will not be saved there."
             )
             config.log_to_file = False
 
     _log(
-        "Performance tests using perftest\n"
-        "perftest: https://github.com/nyggus/perftest\n"
+        "Performance tests using perftester\n"
+        "perftester: https://github.com/nyggus/perftester\n"
         "--------------------------------------------"
         f"\n\nCollected {files_len} "
-        "perftest modules for testing.\n"
+        "perftester modules for testing.\n"
     )
 
 
@@ -115,7 +115,7 @@ def _import_module(file):
     return module, module_name
 
 
-def _perftest(module_name, func, *args, **kwargs):
+def _perftester(module_name, func, *args, **kwargs):
     try:
         func(*args, **kwargs)
     except TimeTestError as e:
@@ -133,37 +133,37 @@ def _perftest(module_name, func, *args, **kwargs):
     return 0
 
 
-def _find_perftest_functions(module):
+def _find_perftester_functions(module):
     functions = []
     items = dir(module)
     for item in items:
         item_real = getattr(module, item)
-        if inspect.isfunction(item_real) and item.startswith("perftest_"):
+        if inspect.isfunction(item_real) and item.startswith("perftester_"):
             functions.append(item_real)
     return functions
 
 
-def _find_perftest_files(path: pathlib.Path):
-    return [file for file in path.rglob("perftest_*.py")]
+def _find_perftester_files(path: pathlib.Path):
+    return [file for file in path.rglob("perftester_*.py")]
 
 
-def _log_perftest_results(test_results):
-    passed_perftests = test_results.passed_tests
-    failed_perftests = test_results.failed_tests
-    n_of_tests = len(passed_perftests) + len(failed_perftests)
+def _log_perftester_results(test_results):
+    passed_perftesters = test_results.passed_tests
+    failed_perftesters = test_results.failed_tests
+    n_of_tests = len(passed_perftesters) + len(failed_perftesters)
 
     _log(
         f"\n\nPerfomance testing done.\nOut of {n_of_tests} tests,"
-        f" {len(passed_perftests)} has passed"
-        f" and {len(failed_perftests)} has failed."
+        f" {len(passed_perftesters)} has passed"
+        f" and {len(failed_perftesters)} has failed."
     )
-    if len(passed_perftests) > 0:
+    if len(passed_perftesters) > 0:
         _log("\nPassed tests:")
-        for test in passed_perftests:
+        for test in passed_perftesters:
             _log(test)
-    if len(failed_perftests) > 0:
+    if len(failed_perftesters) > 0:
         _log(f"\nFailed tests:")
-        for test in failed_perftests:
+        for test in failed_perftesters:
             _log(test)
     print()
 

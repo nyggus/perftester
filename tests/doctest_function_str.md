@@ -4,7 +4,7 @@
 ## Imports and the tested function
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> from easycheck import assert_instance, assert_length, assert_if
 >>> import re
 
@@ -21,28 +21,28 @@ A function to be tested (just a function with some string manipulations, nothing
 
 ## Errors
 
-Note that when an exception is raised from the tested function, the `perftest` functions will throw the `perftest.FunctionError` error, which will contain the original error, too:
+Note that when an exception is raised from the tested function, the `perftester` functions will throw the `perftester.FunctionError` error, which will contain the original error, too:
 
 ```python
 >>> pt.time_test(preprocess, 123, raw_limit=1)
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
+perftester.perftester.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
 >>> pt.memory_usage_test(preprocess, 123, raw_limit=1)
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
+perftester.perftester.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
 >>> pt.time_benchmark(preprocess, 123)
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
+perftester.perftester.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
 >>> pt.memory_usage_benchmark(preprocess, 123)
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: expected string or bytes-like object
+perftester.perftester.FunctionError: The tested function raised TypeError: expected string or bytes-like object
 
 ```
 

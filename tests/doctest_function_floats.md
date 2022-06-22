@@ -1,7 +1,7 @@
 # Tests: A case study with floating numbers
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 
 ```
 

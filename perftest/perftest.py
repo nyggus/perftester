@@ -3,18 +3,18 @@
 The singleton Config class is used in all testing in the same session; its
 instance is created during import and can be used by all functions.
 
-Do note that unlike timeit functions, perftest works with times of a single
+Do note that unlike timeit functions, perftester works with times of a single
 call of a function. That way, the user can define tests without worrying of
 different settings: while the "number" argument in timeit functions affects
-the results, it does not so in perftest.
+the results, it does not so in perftester.
 
 Remember that all lambda functions are stored as anonymous functions,
-without a name. Hence it's better to avoid using lambdas in perftest.
+without a name. Hence it's better to avoid using lambdas in perftester.
 
-For the sake of pretty-printing the benchmarks, perftest comes with a pp
+For the sake of pretty-printing the benchmarks, perftester comes with a pp
 function, which rounds all numbers to four significant digits and prints
 the object using pprint.pprint:
->>> import perftest as pt
+>>> import perftester as pt
 >>> pt.pp([2.1212, 2.93135])
 [2.121, 2.931]
 
@@ -49,7 +49,7 @@ from statistics import mean
 
 
 class CLIPathError(Exception):
-    """Exception class to be used for the CLI perftest app."""
+    """Exception class to be used for the CLI perftester app."""
 
 
 class LogFilePathError(Exception):
@@ -83,7 +83,7 @@ class Config:
     """Default configuration for testing.
 
     It is a singleton whose instance is created once, during import
-    of the perftest module.
+    of the perftester module.
     """
 
     _instance = None
@@ -123,7 +123,7 @@ class Config:
         self.cut_traceback()
 
         self.log_to_file = True
-        self.log_file = Path(os.getcwd()) / "perftest.log"
+        self.log_file = Path(os.getcwd()) / "perftester.log"
 
     @property
     def digits_for_printing(self):
@@ -169,7 +169,7 @@ class Config:
     def cut_traceback():
         """Remove traceback from exceptions, and report only exceptions.
 
-        This is the default behavior of perftest, as when testing performance,
+        This is the default behavior of perftester, as when testing performance,
         you do not look fofr bugs in code, so no need to analyze traceback.
         """
         sys.tracebacklimit = 0
@@ -295,7 +295,7 @@ class Config:
         will be run.
 
         However, this will not change any settings for functions that were already
-        set using self.set, or which were already used in perftest.
+        set using self.set, or which were already used in perftester.
 
         Args:
             which (str): either "time" or "memory"
@@ -394,7 +394,7 @@ class Config:
         )
 
 
-# Create a single instance of Config; this is done when the perftest module is imported.
+# Create a single instance of Config; this is done when the perftester module is imported.
 config = Config()
 
 
@@ -490,7 +490,7 @@ def time_test(func,
     >>> time_test(f, raw_limit=1e-10, n=1000) #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftest.TimeTestError: Time test not passed for function f:
+    perftester.TimeTestError: Time test not passed for function f:
     raw_limit = 1e-10
     minimum run time = ...
 
@@ -503,7 +503,7 @@ def time_test(func,
     >>> time_test(f, relative_limit=1, n=10) #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftest.TimeTestError: Time test not passed for function f:
+    perftester.TimeTestError: Time test not passed for function f:
     relative_limit = 1
     minimum time ratio = ...
 
@@ -521,7 +521,7 @@ def time_test(func,
     >>> time_test(f, relative_limit=.1, n=10)  #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftest.TimeTestError: Time test not passed for function f:
+    perftester.TimeTestError: Time test not passed for function f:
     relative_limit = 0.1
     minimum time ratio = ...
 
@@ -607,7 +607,7 @@ def memory_usage_test(
             'max': the overall max (so, the maximum usage of memory across all
                 runs)
         when memory_limits is not None:
-            Nothing when the test passes; PerftestError is raised otherwise
+            Nothing when the test passes; perftesterError is raised otherwise
             (it then provides the limit and the measured memory usage)
     >>> def sum1(n): return sum([i**2 for i in range(n)])
     >>> first_run = memory_usage_benchmark(sum1, n=100_000)

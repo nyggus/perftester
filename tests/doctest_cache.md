@@ -5,7 +5,7 @@
 Let's check out the `@cache` decorator from `functools`. As it is available from Python 3.9, we will use `@lru_cache`, available also in earlier versions of Python 3. We will use the standard function for such examples, that is, factorial:
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> from functools import lru_cache
 >>> def factorial(n):
 ...     return n * factorial(n - 1) if n else 1

@@ -1,17 +1,17 @@
-# Use of `perftest.config`
+# Use of `perftester.config`
 
-When you import `perftest`, `config`, an instance of `Config`, is created:
+When you import `perftester`, `config`, an instance of `Config`, is created:
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> pt.config #doctest: +ELLIPSIS
-<perftest.perftest.Config object at ...
+<perftester.perftester.Config object at ...
 
 ```
 
 > As `Config` is a singleton class, in one session, only one instance of `Config` is created, and it is indeed called `config`.
 
-This object contains all you need to change settings of your `perftest`s. Let's see what it includes at the beginning, in addition to in-built methods:
+This object contains all you need to change settings of your `perftester`s. Let's see what it includes at the beginning, in addition to in-built methods:
 
 ```python
 >>> [i for i in dir(pt.config) if not i.startswith("_")]
@@ -51,7 +51,7 @@ Most likely, there is only one situation in which you would need to call this me
 The `defaults` attribute is the following dictionary:
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> pt.config.defaults
 {'time': {'number': 100000, 'repeat': 5}, 'memory': {'repeat': 1}}
 
@@ -144,12 +144,12 @@ This attribute simply contains the settings for any function for which they were
 
 Notice in the last example that it is enough to run a test for a new function, and this function will appear in `pt.config.settings`.
 
-You do not need to directly use this attribute. `perftest` functions use them, and you can change them using the `.set()` method.
+You do not need to directly use this attribute. `perftester` functions use them, and you can change them using the `.set()` method.
 
 
 ### Traceback
 
-As `perftest` does not aim to catch bugs in your code, you need not see and analyze the full traceback after a test does not pass. Hence, the default behavior is to print only the error itself, without the traceback.
+As `perftester` does not aim to catch bugs in your code, you need not see and analyze the full traceback after a test does not pass. Hence, the default behavior is to print only the error itself, without the traceback.
 
 You can change this behavior using `.full_traceback()` method, and then change back using `.cut_traceback()`.
 
@@ -175,7 +175,7 @@ The `.digits_for_printing` controls the way `pp` rounds numbers, but also the wa
 Using the default values, you could for instance get the following exception:
 
 ```python
-perftest.perftest.MemoryTestError: Memory test not passed for function f:
+perftester.perftester.MemoryTestError: Memory test not passed for function f:
 relative memory limit = 2.0
 maximum obtained relative memory usage = 3.321
 ```
@@ -183,7 +183,7 @@ maximum obtained relative memory usage = 3.321
 but with `pt.config.digits_for_printing = 7`, you would get this:
 
 ```python
-perftest.perftest.MemoryTestError: Memory test not passed for function f:
+perftester.perftester.MemoryTestError: Memory test not passed for function f:
 relative memory limit = 2.0
 maximum obtained relative memory usage = 3.321411
 ```

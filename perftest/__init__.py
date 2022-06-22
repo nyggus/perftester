@@ -1,4 +1,4 @@
-from .perftest import (
+from .perftester import (
     IncorrectArgumentError,
     TimeTestError,
     MemoryTestError,

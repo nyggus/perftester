@@ -1,13 +1,13 @@
 # Use of `pt.pp()` function
 
-`perftest` offers a `pp()` function for pretty-printing of benchmarking results. This is a simple wrapper around the built-in `pprint.pprint()` function that uses `rounder.signif_object()` function (see [here](https://pypi.org/project/rounder/) to learn about the `rounder` package).
+`perftester` offers a `pp()` function for pretty-printing of benchmarking results. This is a simple wrapper around the built-in `pprint.pprint()` function that uses `rounder.signif_object()` function (see [here](https://pypi.org/project/rounder/) to learn about the `rounder` package).
 
-The `pp()` function is not included here for more general uses (even if it can be used in man y various scenarios), as it depends on `pt.config` through the `pt.config.digits_for_printing` attribute. If you want to achieve similar effects without the need to import `perftest`, use the `rounder` package to round objects and `pprint.pprint()` to pretty-print them.
+The `pp()` function is not included here for more general uses (even if it can be used in man y various scenarios), as it depends on `pt.config` through the `pt.config.digits_for_printing` attribute. If you want to achieve similar effects without the need to import `perftester`, use the `rounder` package to round objects and `pprint.pprint()` to pretty-print them.
 
 Throughout the documentation files in this repository, you will find many examples of using `pt.pp()` to print the results of various benchmarks and tests. Thus, here you will find only several simple uses of `pt.pp()`.
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> pt.pp(20.00444)
 20.0
 >>> pt.pp(.00444)

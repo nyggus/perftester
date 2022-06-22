@@ -3,8 +3,8 @@ echo Grab a cup of coffee as this will take some time, my friend...
 
 python -m doctest README.md 
 
-cd ./perftest
-python -m doctest perftest.py
+cd ./perftester
+python -m doctest perftester.py
 
 cd ../docs
 python -m doctest benchmarking_against_another_function.md

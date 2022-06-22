@@ -25,7 +25,7 @@ So, we have the following two functions and we want to test `f2()` against `f()`
 Let's check the performance of both functions for large `n`, for which the way memory is allocated can make a difference. (For the purpose of `doctest`s used in this file, we will change benchmark settings; this will also make the results short enough to be presented here.)
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> pt.config.set_defaults("time", number=25, repeat=3) # change defaults - both functions will use these settings
 >>> n_for_comparison = 10_000_000
 
