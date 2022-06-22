@@ -9,12 +9,12 @@ extras_requirements = {
 
 setuptools.setup(
     name="perftest",
-    version="0.2.1",
+    version="0.2.2",
     author="Nyggus",
     author_email="nyggus@gmail.com",
     description="Lightweight performance testing in Python",
     long_description=long_description,
-    long_description_content_type="text/x-md",
+    long_description_content_type="text/markdown",
     url="https://github.com/nyggus/perftest",
     packages=setuptools.find_packages(),
     classifiers=[
