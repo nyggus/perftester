@@ -85,7 +85,7 @@ class Config:
     It is a singleton whose instance is created once, during import
     of the perftester module.
     """
-
+    config_file = Path("config_perftester.py")
     _instance = None
 
     def __new__(cls, *args, **kwargs):

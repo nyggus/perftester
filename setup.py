@@ -9,7 +9,7 @@ extras_requirements = {
 
 setuptools.setup(
     name="perftester",
-    version="0.3.1",
+    version="0.3.2",
     author="Nyggus",
     author_email="nyggus@gmail.com",
     description="Lightweight performance testing in Python",
