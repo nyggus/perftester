@@ -66,6 +66,9 @@ You can learn more in the detailed description of the package below.
 The API of `perftester` testinf functions is similar to that of benchmarking functions, the only difference being limits you need to provide. You can determine those limits using the above benchmark functions. Here are examples of several performance tests using `perftester`:
 
 ```python
+>>> import perftester as pt
+>>> def foo(x, n): return [x] * n
+
 # A raw test
 >>> pt.time_test(foo, raw_limit=9.e-07, x=129, n=100)
 

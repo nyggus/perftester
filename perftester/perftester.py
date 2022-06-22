@@ -802,7 +802,7 @@ def pp(*args):
     0.1222
     >>> pp(dict(a=.12121212, b=23.234234234), ["system failure", 345345.345])
     {'a': 0.1212, 'b': 23.23}
-    ['system failure', 345300.0]
+    ['system failure', 345300]
     """
     for arg in args:
         pprint(

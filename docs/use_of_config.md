@@ -164,7 +164,7 @@ The `.digits_for_printing` controls the way `pp` rounds numbers, but also the wa
 
 >>> pt.config.digits_for_printing = 3
 >>> pt.pp({"a": 1.123123, "b": 3434.3434})
-{'a': 1.12, 'b': 3430.0}
+{'a': 1.12, 'b': 3430}
 
 >>> pt.config.digits_for_printing = 5
 >>> pt.pp({"a": 1.123123, "b": 3434.3434})
