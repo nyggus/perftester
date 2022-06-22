@@ -1,7 +1,7 @@
-# Basic use of `perftest.time_test()`
+# Basic use of `perftester.time_test()`
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> def preprocess(string):
 ...    return string.lower().strip()
 >>> test_string = "  Oh oh the young boy, this YELLOW one, wants to sing a song about the sun.\n"
@@ -51,7 +51,7 @@ If you overdo with the limit so that the test fails, you will see the following:
 >>> pt.time_test(preprocess, raw_limit=2e-08, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeTestError: Time test not passed for function preprocess:
+perftester.perftester.TimeTestError: Time test not passed for function preprocess:
 raw_limit = 2e-08
 minimum run time = ...
 
@@ -73,7 +73,7 @@ If you overdo with the limit so that the test fails, you will see the following:
 >>> pt.time_test(preprocess, relative_limit=1, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeTestError: Time test not passed for function preprocess:
+perftester.perftester.TimeTestError: Time test not passed for function preprocess:
 relative_limit = 1
 minimum time ratio = ...
 
@@ -95,21 +95,21 @@ Again, here're three examples of a failed test:
 >>> pt.time_test(preprocess, raw_limit=2e-08, relative_limit=10, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeTestError: Time test not passed for function preprocess:
+perftester.perftester.TimeTestError: Time test not passed for function preprocess:
 raw_limit = 2e-08
 minimum run time = ...
 
 >>> pt.time_test(preprocess, raw_limit=2e-06, relative_limit=1, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeTestError: Time test not passed for function preprocess:
+perftester.perftester.TimeTestError: Time test not passed for function preprocess:
 relative_limit = 1
 minimum time ratio = ...
 
 >>> pt.time_test(preprocess, raw_limit=2e-08, relative_limit=1, string=test_string) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.TimeTestError: Time test not passed for function preprocess:
+perftester.perftester.TimeTestError: Time test not passed for function preprocess:
 raw_limit = 2e-08
 minimum run time = ...
 

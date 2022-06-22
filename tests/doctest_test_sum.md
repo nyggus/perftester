@@ -3,26 +3,26 @@
 Catch exceptions:
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> pt.time_test(sum, "this cannot be summed up", raw_limit=1)
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+perftester.perftester.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
 >>> pt.memory_usage_test(sum, "this cannot be summed up", raw_limit=1)
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+perftester.perftester.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
 >>> pt.time_benchmark(sum, "this cannot be summed up")
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+perftester.perftester.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
 >>> pt.memory_usage_benchmark(sum, "this cannot be summed up")
 Traceback (most recent call last):
     ...
-perftest.perftest.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
+perftester.perftester.FunctionError: The tested function raised TypeError: unsupported operand type(s) for +: 'int' and 'str'
 
 ```
 
@@ -70,7 +70,7 @@ In terms of memory, this should not have any effect, so clearly one of the below
 ...                             raw_limit=memory_sum_perf_twice[n]["max"]) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryTestError: Memory test not passed for function sum:
+perftester.perftester.MemoryTestError: Memory test not passed for function sum:
 memory_limit = ...
 maximum memory usage = ...
 

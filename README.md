@@ -1,11 +1,11 @@
-# `perftest`: Lightweight performance testing of Python functions
+# `perftester`: Lightweight performance testing of Python functions
 
 ## Installation
 
 Install using `pip`:
 
 ```shell
-pip install perftest
+pip install perftester
 ```
 
 The package has three external dependencies: [`memory_profiler`](https://pypi.org/project/memory-profiler/) ([repo](https://github.com/pythonprofilers/memory_profiler)), [`easycheck`](https://pypi.org/project/easycheck/) ([repo](https://github.com/nyggus/easycheck)), and [`rounder`](https://pypi.org/project/rounder/) ([repo](https://github.com/nyggus/rounder)).
@@ -13,7 +13,7 @@ The package has three external dependencies: [`memory_profiler`](https://pypi.or
 
 ## Pre-introduction: TL;DR
 
-At the most basic level, using `perftest` is simple. It offers you two functions for benchmarking (one for execution time and one for memory), and two functions for performance testing (likewise). Read below for a very short introduction of them. If you want to learn more, however, do not stop there, but read on.
+At the most basic level, using `perftester` is simple. It offers you two functions for benchmarking (one for execution time and one for memory), and two functions for performance testing (likewise). Read below for a very short introduction of them. If you want to learn more, however, do not stop there, but read on.
 
 
 ### Benchmarking
@@ -21,7 +21,7 @@ At the most basic level, using `perftest` is simple. It offers you two functions
 You have `time_benchmark()` and `memory_benchmark()` functions:
 
 ```python
-import perftest as pt
+import perftester as pt
 def foo(x, n): return [x] * n
 pt.time_benchmark(foo, x=129, n=100)
 ```
@@ -63,9 +63,12 @@ You can learn more in the detailed description of the package below.
 
 ### Testing
 
-The API of `perftest` testinf functions is similar to that of benchmarking functions, the only difference being limits you need to provide. You can determine those limits using the above benchmark functions. Here are examples of several performance tests using `perftest`:
+The API of `perftester` testinf functions is similar to that of benchmarking functions, the only difference being limits you need to provide. You can determine those limits using the above benchmark functions. Here are examples of several performance tests using `perftester`:
 
 ```python
+>>> import perftester as pt
+>>> def foo(x, n): return [x] * n
+
 # A raw test
 >>> pt.time_test(foo, raw_limit=9.e-07, x=129, n=100)
 
@@ -91,22 +94,22 @@ Raw tests work with raw executation time. Relative tests work with relative time
 
 > Relative results, however, can differ between different operating systems.
 
-You can use these testing functions in `pytest`, or in dedicated `doctest` files. You can, however, use `perftest` as a separate performance testing framework. Read on to learn more about that. What's more, `perftest` offers more functionalities, and a `config` object that offers you much more control of testing.
+You can use these testing functions in `pytest`, or in dedicated `doctest` files. You can, however, use `perftester` as a separate performance testing framework. Read on to learn more about that. What's more, `perftester` offers more functionalities, and a `config` object that offers you much more control of testing.
 
-That's all in this short introduction. If you're interested in more advanced use of `perftest`, read on to read a far more detailed introduction. In addition, files in the [docs](docs/) folder explain in detail particular functionalities that `perftest` offers.
+That's all in this short introduction. If you're interested in more advanced use of `perftester`, read on to read a far more detailed introduction. In addition, files in the [docs](docs/) folder explain in detail particular functionalities that `perftester` offers.
 
 ## Introduction
 
 
-`perftest` is a lightweight package for simple performance testing in Python. Here, performance refers to execution time and memory usage, so performance testing means testing if a function performs quickly enough and does not use too much RAM. In addition, the module offers you simple functions for straightforward benchmarking, in terms of both execution time and memory.
+`perftester` is a lightweight package for simple performance testing in Python. Here, performance refers to execution time and memory usage, so performance testing means testing if a function performs quickly enough and does not use too much RAM. In addition, the module offers you simple functions for straightforward benchmarking, in terms of both execution time and memory.
 
-Under the hood, `perftest` is a wrapper around two functions from other modules:
-* `perftest.time_benchmark()` and `perftest.time_test()` use `timeit.repeat()`
-* `perftest.memory_usage_benchmark()` and `perftest.memory_usage_test()` use `memory_profiler.memory_usage()`
+Under the hood, `perftester` is a wrapper around two functions from other modules:
+* `perftester.time_benchmark()` and `perftester.time_test()` use `timeit.repeat()`
+* `perftester.memory_usage_benchmark()` and `perftester.memory_usage_test()` use `memory_profiler.memory_usage()`
 
-What `perftest` offers is a testing framework with as simple syntax as possible.
+What `perftester` offers is a testing framework with as simple syntax as possible.
 
-You can use `perftest` in three main ways:
+You can use `perftester` in three main ways:
 * in an interactive session, for simple benchmarking of functions;
 * as part of another testing framework, like `doctest` or `pytest`s; and
 * as an independent testing framework.
@@ -116,35 +119,35 @@ The first way is a different type of use from the other two. I use it to learn t
 When it comes to actual testing, it's difficult to say which of the last two ways is better or more convinient: it may depend on how many performance tests you have, and how much time they take. If the tests do not take more than a couple of seconds, then you can combine them with unit tests. But if they take much time, you should likely make them independent of unit tests, and run them from time to time.
 
 
-## Using `perftest`
+## Using `perftester`
 
 ### Use it as a separate testing framework
 
-To use `perftest` that way,
+To use `perftester` that way,
 
-* Collect tests in Python modules whose names start with "perftest_"; for instance, "perftest_module1.py", perftest_module2.py" and the like.
-* Inside these modules, collect testing functions that start with "perftest_"; for instance, `def perftest_func_1()`, `def perftest_func_2()`, and the like (note how similar this approach is to that which `pytest` uses);
-* You can create a config_perftest.py file, in which you can change any configuration you want, using the `perftest.config` object. The file should be located in the folder from which you will run the CLI command `perftest`. If this file is not there, `perftest` will use its default configuration. Note that cofig_perftest.py is a Python module,so `perftest` configuration is done in actual Python code.
-* Now you can run performance tests using `perftest` in your shell. You can do it in three ways:
-  * `$ perftest` recursively collects all `perftest` modules from the directory in which the command was run, and from all its subdirectories; then it runs all the collected `perftest` tests;
-  * `$ perftest path_to_dir` recursively collects all `perftest` modules from path_to_dir/ and runs all perftests located in them.
-  * `$ perftest path_to_file.py` runs all perftests from the module given in the path.
+* Collect tests in Python modules whose names start with "perftester_"; for instance, "perftester_module1.py", perftester_module2.py" and the like.
+* Inside these modules, collect testing functions that start with "perftester_"; for instance, `def perftester_func_1()`, `def perftester_func_2()`, and the like (note how similar this approach is to that which `pytest` uses);
+* You can create a config_perftester.py file, in which you can change any configuration you want, using the `perftester.config` object. The file should be located in the folder from which you will run the CLI command `perftester`. If this file is not there, `perftester` will use its default configuration. Note that cofig_perftester.py is a Python module,so `perftester` configuration is done in actual Python code.
+* Now you can run performance tests using `perftester` in your shell. You can do it in three ways:
+  * `$ perftester` recursively collects all `perftester` modules from the directory in which the command was run, and from all its subdirectories; then it runs all the collected `perftester` tests;
+  * `$ perftester path_to_dir` recursively collects all `perftester` modules from path_to_dir/ and runs all perftesters located in them.
+  * `$ perftester path_to_file.py` runs all perftesters from the module given in the path.
 
-Read more about using perftest that way [here](docs/use_perftest_as_CLI.md).
+Read more about using perftester that way [here](docs/use_perftester_as_CLI.md).
 
-> It **does** make a difference how you do that. When you run the `perftest` command with each testing file independently, each file will be tested in a separated session, so with a new instance of the `pt.config` object. When you run the command for a directory, all the functions will be tested in one session. And when you run a bare `perftest` command, all your tests will be run in one session.
+> It **does** make a difference how you do that. When you run the `perftester` command with each testing file independently, each file will be tested in a separated session, so with a new instance of the `pt.config` object. When you run the command for a directory, all the functions will be tested in one session. And when you run a bare `perftester` command, all your tests will be run in one session.
 
 > There is no best approach, but remember to choose one that suits your needs.
 
 
-### Use `perftest` inside `pytest`
+### Use `perftester` inside `pytest`
 
-This is a very simple approach, perhaps the simplest one: When you use `pytest`, you can simply add `perftest` testing functions to `pytest` testing functions, and that way both frameworks will be combined, or rather the `pytest` framework will run `perftest` tests. The amount of additional work is minimal. 
+This is a very simple approach, perhaps the simplest one: When you use `pytest`, you can simply add `perftester` testing functions to `pytest` testing functions, and that way both frameworks will be combined, or rather the `pytest` framework will run `perftester` tests. The amount of additional work is minimal. 
 
 For instance, you can write the following test function:
 
 ```python
-import perftest as pt
+import perftester as pt
 from my_module import f1 # assume that f1 takes two arguments, a string (x) and a float (y)
 def test_performance_of_f1():
     pt.time_test(
@@ -156,7 +159,7 @@ def test_performance_of_f1():
 This will use either the settings for this particular function (if you set them in `pt.config`) or the default settings (also from `pt.config`). However, you can also use `Number` and `Repeat` arguments, in order to overwrite these settings (passed to `timeit.repeat()` as `number` and `repeat`, respectively) for this particular function call:
 
 ```python
-import perftest as pt
+import perftester as pt
 from my_module import f1 # assume that f1 takes two arguments, a string (x) and a float (y)
 def test_performance_of_f1():
     pt.time_test(
@@ -166,23 +169,23 @@ def test_performance_of_f1():
       Number=1_000_000, Repeat=20)
 ```
 
-If you now run `pytest` and the test passes, nothing will happen — just like with a regular `pytest` test. If the test fails, however, a `perftest.TimeTestError` exception will be thrown, with some additional information.
+If you now run `pytest` and the test passes, nothing will happen — just like with a regular `pytest` test. If the test fails, however, a `perftester.TimeTestError` exception will be thrown, with some additional information.
 
-> `perftest`'s default behavior is to significantly shorten traceback. Therefore, if you use it with `pytest`, you can be a little amazed and disappointed. But it's easy to change this behavior, with just one command: `pt.config.full_traceback()`.
+> `perftester`'s default behavior is to significantly shorten traceback. Therefore, if you use it with `pytest`, you can be a little amazed and disappointed. But it's easy to change this behavior, with just one command: `pt.config.full_traceback()`.
 
-This is the easiest way to use `perftest`. Its only drawback is that if the performance tests take much time, `pytest` will also take much time, something usually to be avoided. You can then do some `pytest` tricks to not run `perftest` tests, and run them only when you want — or you can simply use the above-described command-line `perftest` framework for performance testing.
+This is the easiest way to use `perftester`. Its only drawback is that if the performance tests take much time, `pytest` will also take much time, something usually to be avoided. You can then do some `pytest` tricks to not run `perftester` tests, and run them only when you want — or you can simply use the above-described command-line `perftester` framework for performance testing.
 
 
-### Use `perftest` inside `doctest`
+### Use `perftester` inside `doctest`
 
-In the same way, you can use `perftest` in `doctest`. You will find plenty of examples in the documentation here, and in the [tests/ folder](tests/). 
+In the same way, you can use `perftester` in `doctest`. You will find plenty of examples in the documentation here, and in the [tests/ folder](tests/). 
 
-> A great fan of `doctest`ing, I do **not** recommend using `perftest` in docstrings. For me, `doctest`s in docstrings should clarify things and explain how functions work, and adding a performance test to a function's docstring would decrease readability. 
+> A great fan of `doctest`ing, I do **not** recommend using `perftester` in docstrings. For me, `doctest`s in docstrings should clarify things and explain how functions work, and adding a performance test to a function's docstring would decrease readability. 
 
 The best way, thus, is to write performance tests as separate `doctest` files, dedicated to performance testing. You can collect such files in a shell script that runs performance tests.
 
 
-## Basic use of `perftest`
+## Basic use of `perftester`
 
 
 ### Simple benchmarking
@@ -190,7 +193,7 @@ The best way, thus, is to write performance tests as separate `doctest` files, d
 To create a performance test for a function, you likely need to know how it behaves. You can run two simple benchmarking functions, `pt.memory_usage_benchmark()` and `pt.time_benchmark()`, which will run time and memory benchmarks, respectively. First, we will decrease `number` (passed to `timeit.repeat`), in order to shorten the benchmarks (which here serve as `doctest`s):
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> def f(n): return sum(map(lambda i: i**0.5, range(n)))
 >>> pt.config.set(f, "time", number=1000)
 >>> b_100_time = pt.time_benchmark(f, n=100)
@@ -300,7 +303,7 @@ In a memory usage test, a function is called only once. You can change that — 
 
 (There is little sence in repeating this particular function, as you will get almost the same results in each repetition.)
 
-Of course, memory tests do not have to be very useful for functions that do not have to allocate too much memory, but as you will see in other documentation files in `perftest`, some function do use a lot of memory, and such tests do make quite a lot sense for them.
+Of course, memory tests do not have to be very useful for functions that do not have to allocate too much memory, but as you will see in other documentation files in `perftester`, some function do use a lot of memory, and such tests do make quite a lot sense for them.
 
 
 ## Configuration: `pt.config`
@@ -315,18 +318,18 @@ The whole configuration is stored in the `pt.config` object, which you can easil
 
 but you can change much more using it. **You can read in detail about using `pt.config` [here](docs/use_of_config.md)**.
 
-When you use `perftest` as a command-line tool, you can modify `pt.config` in the `settings_perftest.py` module, for instance:
+When you use `perftester` as a command-line tool, you can modify `pt.config` in the `settings_perftester.py` module, for instance:
 
 ```python
-# settings_perftest.py
-import perftest as pt
+# settings_perftester.py
+import perftester as pt
 
 # shorten the tests
 pt.config.set_defaults("time", number=10_000, repeat=3) 
 
 # log the results to file (they will be printed in the console anyway)
 pt.config.log_to_file = True
-pt.config.log_file = "./perftest.log"
+pt.config.log_file = "./perftester.log"
 
 # increase the digits for printing floating numbers
 pt.config.digits_for_printing = 7
@@ -336,9 +339,9 @@ pt.config.full_traceback()
 
 ```
 
-and so on. You can also change settings in each testing file itself, preferably in `perftest_` functions.
+and so on. You can also change settings in each testing file itself, preferably in `perftester_` functions.
 
-When you use `perftest` in an interactive session, you update `pt.config` in a normal way, in the session. And when you use `perftest` inside `pytest`, you can do it in conftest.py and in each testing function.
+When you use `perftester` in an interactive session, you update `pt.config` in a normal way, in the session. And when you use `perftester` inside `pytest`, you can do it in conftest.py and in each testing function.
 
 
 ## Output
@@ -347,13 +350,13 @@ If a test fails, you will see something like this:
 
 ```shell
 # for time test
-TimeTestError in perftest_for_testing.perftest_f
+TimeTestError in perftester_for_testing.perftester_f
 Time test not passed for function f:
 raw_limit = 0.011
 minimum run time = 0.1007
 
 # for memory test
-MemoryTestError in perftest_for_testing.perftest_f2_time_and_memory
+MemoryTestError in perftester_for_testing.perftester_f2_time_and_memory
 Memory test not passed for function f2:
 memory_limit = 20
 maximum memory usage = 20.04
@@ -362,14 +365,14 @@ maximum memory usage = 20.04
 Let's analyze what we see in this output:
 
 * Whether it's an error from a time test (`TimeTestError`) or a memory test (`MemoryTestError`).
-* `perftest_for_testing.perftest_f` provides the testing module (`perftest_for_testing`) and the perftest function (`perftest_f2_time_and_memory`).
-* `Memory test not passed for function f2:`: Here you see for which tested (not `perftest_`) function the test failed (here, `f2()`).
+* `perftester_for_testing.perftester_f` provides the testing module (`perftester_for_testing`) and the perftester function (`perftester_f2_time_and_memory`).
+* `Memory test not passed for function f2:`: Here you see for which tested (not `perftester_`) function the test failed (here, `f2()`).
 * `raw_limit` and `memory_limit`: these are the raw limits you provided; these could be also `relative_limit` and `relative_memory_limit`, for relative tests.
 * `minimum run time` and `maximum memory usage` are the actual results from testing, and they were too high (higher than the limits set inside the testing function).
 
-You can locate where a particular test failed, using the module, `perftest_` function, and the tested function. If a `perftest_` function combines more tests, then you can find the failed test using the limits.
+You can locate where a particular test failed, using the module, `perftester_` function, and the tested function. If a `perftester_` function combines more tests, then you can find the failed test using the limits.
 
-> Like in `pytest`, a recommended approach is to use one performance test per `perftest_` function. This can save you some time and trouble, but also this will ensure that all tests will be run.
+> Like in `pytest`, a recommended approach is to use one performance test per `perftester_` function. This can save you some time and trouble, but also this will ensure that all tests will be run.
 
 
 #### Summary output
@@ -380,16 +383,16 @@ At the end, you will see a simple summary of the results, something like this:
 Out of 8 tests, 5 has passed and 3 has failed.
 
 Passed tests:
-perftest_for_testing.perftest_f2
-perftest_for_testing.perftest_f2_2
-perftest_for_testing.perftest_f2_3
-perftest_for_testing.perftest_f3
-perftest_for_testing_2.perftest_f
+perftester_for_testing.perftester_f2
+perftester_for_testing.perftester_f2_2
+perftester_for_testing.perftester_f2_3
+perftester_for_testing.perftester_f3
+perftester_for_testing_2.perftester_f
 
 Failed tests:
-perftest_for_testing.perftest_f
-perftest_for_testing.perftest_f2_time_and_memory
-perftest_for_testing.perftest_f_2
+perftester_for_testing.perftester_f
+perftester_for_testing.perftester_f2_time_and_memory
+perftester_for_testing.perftester_f_2
 ```
 
 
@@ -403,14 +406,14 @@ In the basic use, when you choose a relative benchmark, you compare the performa
 
 ## Raw and relative performance testing
 
-Surely, any performance tests are strongly environment-dependent, so you need to remember that when writing and conducting any performance tests. `perftest`, however, offers a solution to this: You can define tests based on
+Surely, any performance tests are strongly environment-dependent, so you need to remember that when writing and conducting any performance tests. `perftester`, however, offers a solution to this: You can define tests based on
 
 * raw values: raw execution time and raw memory usage, and
 * relative values: relative execution time and relative memory usage
 
-Above, _relative_ means benchmarking against a built-in (into `perftest`) simple function, which is actually an empty function (so it represents the overhead of running a function). Thus, you can, for instance, test whether your function is two times slower than this function. The benchmarking function itself does not matter, as it is just a benchmark. What matters is that, usually, your function should _relatively to this benchmarking function_ behave the same way between different machines. So, if it works two times slower than the benchmarking function on your machine, then it should work in a similar way on another machine, even if this other machine is much faster than yours. Of course, this assumes linearity (so, two times slower here means two times slower everywhere), which does not have to be always true. Anyway, such tests will almost always be more representative, and more precise, than those based on raw times.
+Above, _relative_ means benchmarking against a built-in (into `perftester`) simple function, which is actually an empty function (so it represents the overhead of running a function). Thus, you can, for instance, test whether your function is two times slower than this function. The benchmarking function itself does not matter, as it is just a benchmark. What matters is that, usually, your function should _relatively to this benchmarking function_ behave the same way between different machines. So, if it works two times slower than the benchmarking function on your machine, then it should work in a similar way on another machine, even if this other machine is much faster than yours. Of course, this assumes linearity (so, two times slower here means two times slower everywhere), which does not have to be always true. Anyway, such tests will almost always be more representative, and more precise, than those based on raw times.
 
-This does not mean, however, that raw tests are useless. In fact, in a production environment, you may wish to use raw tests. Imagine a client expects that an app never takes longer than an hour to perform a particular task (note that this strongly depends on what other processes are run in the production environment). You can create an automated test for that using `perftest`, in a very simple way - just several lines of code.
+This does not mean, however, that raw tests are useless. In fact, in a production environment, you may wish to use raw tests. Imagine a client expects that an app never takes longer than an hour to perform a particular task (note that this strongly depends on what other processes are run in the production environment). You can create an automated test for that using `perftester`, in a very simple way - just several lines of code.
 
 You can of course combine both types of tests, and you can do it in a very simple way. Then, the test is run once, but the results are checked with raw limits and relative limits.
 
@@ -423,22 +426,22 @@ Of course, Python comes with various powerful tools for profiling, benchmarking 
 
 * [`cProfile` and `profile`](https://docs.python.org/3/library/profile.html), the built-in powerful tools for deterministic profiling
 * [the built-in `timeit` module](https://docs.python.org/3/library/timeit.html), for benchmarking
-* [`memory_profiler`](https://pypi.org/project/memory-profiler/), a powerful memory profiler (`memory_profiler` is utilized by `perftest`)
+* [`memory_profiler`](https://pypi.org/project/memory-profiler/), a powerful memory profiler (`memory_profiler` is utilized by `perftester`)
   
-In fact, `perftest` is just a simple wrapper around `timeit` and `memory_profiler`, since `perftest` itself does not come with its own solutions. It simply uses these functions and offers an easy-to-use API to benchmark and test memory and time performance.
+In fact, `perftester` is just a simple wrapper around `timeit` and `memory_profiler`, since `perftester` itself does not come with its own solutions. It simply uses these functions and offers an easy-to-use API to benchmark and test memory and time performance.
 
 
 ## Manipulating the traceback
 
-The default behavior of `perftest` is to **not** include the full traceback when a test does not pass. This is because when running performance tests, you're not interested in finding bugs, and this is what traceback is for. Instead, you want to see which test did not pass and how.
+The default behavior of `perftester` is to **not** include the full traceback when a test does not pass. This is because when running performance tests, you're not interested in finding bugs, and this is what traceback is for. Instead, you want to see which test did not pass and how.
 
-> Remember that if you use `perftest` in an interactive session or inside `pytest`, you may want to change this behavior. You can do it by calling a dedicated method in `pt.config`: `pt.config.full_trace()`.
+> Remember that if you use `perftester` in an interactive session or inside `pytest`, you may want to change this behavior. You can do it by calling a dedicated method in `pt.config`: `pt.config.full_trace()`.
 
 
 ## Caveats
 
-* `perftest` does not work with multiple threads or processes.
-* `perftest` is still in a beta version and so is still under testing.
+* `perftester` does not work with multiple threads or processes.
+* `perftester` is still in a beta version and so is still under testing.
 * Watch out when you're running the same test in different operating systems. Even relative tests can differ from OS to OS.
 
 
@@ -449,4 +452,4 @@ The package is developed in Linux (actually, under WSL) and checked in Windows 1
 
 ## Support
 
-Any contribution will be welcome. You can submit an issue in the [repository](https://github.com/nyggus/perftest). You can also create your own pull requests.
+Any contribution will be welcome. You can submit an issue in the [repository](https://github.com/nyggus/perftester). You can also create your own pull requests.

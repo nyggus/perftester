@@ -1,7 +1,7 @@
-# Basic use of `perftest.memory_usage_test()`
+# Basic use of `perftester.memory_usage_test()`
 
 ```python
->>> import perftest as pt
+>>> import perftester as pt
 >>> def sum_of_squares(x):
 ...    return sum([i**2 for i in x])
 >>> x = [1, 2, 10, ]
@@ -50,7 +50,7 @@ If you overdo with the limit (below, we will expect 10 instead of 500) so that t
 >>> pt.memory_usage_test(sum_of_squares, raw_limit=10, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
+perftester.perftester.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
@@ -72,7 +72,7 @@ If you overdo with the limit so that the test fails, you will see the following:
 >>> pt.memory_usage_test(sum_of_squares, relative_limit=1, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
+perftester.perftester.MemoryTestError: Memory test not passed for function sum_of_squares:
 relative memory limit = 1
 maximum obtained relative memory usage = ...
 
@@ -93,21 +93,21 @@ Again, here're three examples of a failed test:
 >>> pt.memory_usage_test(sum_of_squares, raw_limit=10, relative_limit=40, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
+perftester.perftester.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
 >>> pt.memory_usage_test(sum_of_squares, raw_limit=10, relative_limit=1, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
+perftester.perftester.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
 >>> pt.memory_usage_test(sum_of_squares, raw_limit=10, relative_limit=1, x=x) #doctest: +ELLIPSIS
 Traceback (most recent call last):
     ...
-perftest.perftest.MemoryTestError: Memory test not passed for function sum_of_squares:
+perftester.perftester.MemoryTestError: Memory test not passed for function sum_of_squares:
 memory_limit = 10
 maximum memory usage = ...
 
@@ -145,4 +145,4 @@ True
 
 # Conclusion
 
-What you've seen is the most basic use of `perftest.memory_usage_test()`, but it will be enough for most use cases. You can learn more advanced uses throughout the documentation in this folder, from the main README, and from the [tests folder](../tests/).
+What you've seen is the most basic use of `perftester.memory_usage_test()`, but it will be enough for most use cases. You can learn more advanced uses throughout the documentation in this folder, from the main README, and from the [tests folder](../tests/).

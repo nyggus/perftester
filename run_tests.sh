@@ -1,9 +1,9 @@
 # Run all doctests
 echo Grab a cup of coffee as this will take some time, my friend...
 
-cd ./perftest
-echo -- Docstrings in perftest.py
-python -m doctest perftest.py
+cd ./perftester
+echo -- Docstrings in perftester.py
+python -m doctest perftester.py
 
 cd ..
 echo -- The main README.md
