@@ -22,7 +22,7 @@ We know it should be quicker than this function:
 
 ```
 
-We can bechmark the two functions one against another as described in [this file](benchmarking_against_another_function.md), but we can simply overwrite the built-in function. First, let's run memory benchmarks using the built-in function:
+We can bechmark the two functions one against another as described in [this file](benchmarking_against_another_function.md), but here, we will, instead, overwrite the built-in function. First, let's run memory benchmarks using the built-in function (you don't have to do this — we do it for explanation purposes):
 
 ```python
 >>> import perftest as pt
@@ -44,7 +44,7 @@ Now, let's overwrite the built-in benchmark function:
 
 Had `sum_of_squares()` taken no arguments, we would have not needed the `lambda` function, just the function itself. However, as it takes an argument `x`, we need to do this trick. `perftest` does not enable you to pass arguments to an overwritten benchmarking function, for a simple reason that you should rather avoid overwriting it.
 
-> Note that, theoretically, we did not have to reload the benchmarks stored in `config`, since they would be reloaded before any benchmark or test; however, if y ou do not do that, you would get incorrect values after looking at `pt.config.memory_benchmark` and `pt.config.time_benchmark`. 
+> Note that, theoretically, we did not have to reload the benchmarks stored in `config`, since they would be reloaded before any benchmark or test; however, if you do not do that, you would get incorrect values after looking at `pt.config.memory_benchmark` and `pt.config.time_benchmark`. 
 
 We are ready to perform our tests:
 

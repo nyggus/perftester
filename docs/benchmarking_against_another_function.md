@@ -3,9 +3,7 @@
 In basic use, when you choose a relative benchmark, you compare the performance of your function with that of a built-in function `pt.config.benchmark_function()`, the definition of which is very simple:
 
 ```python
-def benchmark_function(self):
-    return [i ** 2 for i in (1, 100, 1000)]
-
+def benchmark_function(self): pass
 ```
 
 More often than not you do't need anything else. But sometimes you may want to benchmark your function against a different function, usually one that means something in the context of your project. For instance, you may want to build your own function that does the same thing as a Python built-in function (or a function from another external Python package), and you want to test that your function performs better.
@@ -15,7 +13,7 @@ More often than not you do't need anything else. But sometimes you may want to b
 
 Most of the times, first, you need to conduct benchmarks for both functions, to see how they perform, unless you have some assumptions that you want or have to use in the tests. 
 
-So, we have the following two functions (which we used in README) and we want to test `f2()` against `f()`:
+So, we have the following two functions and we want to test `f2()` against `f()`:
 
 ```python
 >>> def f(n): return list(range(n))
@@ -94,7 +92,7 @@ This is what I got on my machine:
 
 ```
 
-What we can see is that `f2()`, which uses `array.array`, takes a little more time than does `f()`:
+What we can see is that `f2()`, which uses `array.array()`, takes a little more time than does `f()`:
 
 ```python
 >>> f_performance_time["min"] < f2_performance_time["min"]
@@ -124,7 +122,7 @@ OK, we have our benchmarks, so we can set up limits for both time and memory tes
 
 ```
 
-Often, however, you will not run such benchmarks before running tests, so in actual tests, you would do it in the following way:
+Often, however, you will not run such benchmarks before running tests; so in actual tests, you would do it in the following way:
 
 ```python
 >>> pt.time_test(
@@ -140,7 +138,7 @@ If you do it that way, first the test for `f()` is run and then that for `f2()`.
 
 # Creating a memory performance test of `f2()` against `f()`
 
-Basically, we're doing the same thing, but for memory. When we analyzed the benchmarks, we noted that `f2()` uses over 5 times less memory than does `f()`. Let's build a relative test that `f2()` uses the maximum of 6 times less memory than `f()` uses. This is a version with `f_performance`:
+Basically, we're doing the same thing, but for memory. When we analyzed the benchmarks, we noted that `f2()` uses over 5 times less memory than does `f()`. Let's build a relative test that `f2()` uses the maximum of 6 times less memory (not too strict a test) than `f()` uses. This is a version with `f_performance`:
 
 ```python
 >>> pt.memory_usage_test(
@@ -162,4 +160,4 @@ and here is a direct version, running both tests with one command:
 
 ```
 
-> Note that while for `time_test()` we used `["min"]`, for `memory_usage_test` we have to use `["max"]`, as we are benchmarking against the maximum RAM used throughout the time of executing the function.
+> Note that while for `time_test()` we used `["min"]`, for `memory_usage_test()` we have to use `["max"]`, as we are benchmarking against the maximum RAM used throughout the time of executing the function.

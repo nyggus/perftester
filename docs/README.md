@@ -3,7 +3,6 @@
 This folder contains a number of files that serve two functions: documentation and testing. The main [README](../README.md) contains basic information about how to use `perftest`, while this folder collects both basic and more advanced knowledge of using the package. All these files serve also as doctests (`doctest` being the only testing framework used in `perftest`).
 
 The knowledge is collected in the following files:
-* [Introduction](Introduction.md)
 * [Basic use of `time_test()`](most_basic_use_time.md)
 * [Basic use of `memory_usage_test()`](most_basic_use_memory.md)
 * [Using `perftest.config` for advanced performance testing](use_of_config.md)
