@@ -10,6 +10,7 @@ pip install perftester
 
 The package has three external dependencies: [`memory_profiler`](https://pypi.org/project/memory-profiler/) ([repo](https://github.com/pythonprofilers/memory_profiler)), [`easycheck`](https://pypi.org/project/easycheck/) ([repo](https://github.com/nyggus/easycheck)), and [`rounder`](https://pypi.org/project/rounder/) ([repo](https://github.com/nyggus/rounder)).
 
+> `perftester` is still under heavy testing. If you find anything that does not work as intended, please let me know via nyggus <at> gmail.com.
 
 ## Pre-introduction: TL;DR
 
