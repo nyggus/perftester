@@ -170,7 +170,7 @@ class Config:
         """Remove traceback from exceptions, and report only exceptions.
 
         This is the default behavior of perftester, as when testing performance,
-        you do not look fofr bugs in code, so no need to analyze traceback.
+        you do not look for bugs in code, so no need to analyze traceback.
         """
         sys.tracebacklimit = 0
 
@@ -399,7 +399,7 @@ config = Config()
 
 
 def _str_iterable(an_iterable):
-    """Format an iterable as a string with items seperated with commas.
+    """Format an_iterable as a string with items seperated with commas.
 
     Args:
         an_iterable (iterable): an iterable to be printed as
