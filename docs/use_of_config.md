@@ -15,7 +15,7 @@ This object contains all you need to change settings of your `perftester`s. Let'
 
 ```python
 >>> [i for i in dir(pt.config) if not i.startswith("_")]
-['benchmark_function', 'cut_traceback', 'defaults', 'digits_for_printing', 'full_traceback', 'get_setting', 'log_file', 'log_to_file', 'memory_benchmark', 'reload_memory', 'reload_time', 'set', 'set_defaults', 'settings', 'time_benchmark']
+['benchmark_function', 'config_file', 'cut_traceback', 'defaults', 'digits_for_printing', 'full_traceback', 'get_setting', 'log_file', 'log_to_file', 'memory_benchmark', 'reload_memory', 'reload_time', 'set', 'set_defaults', 'settings', 'time_benchmark']
 
 ```
 
