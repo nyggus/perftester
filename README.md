@@ -172,7 +172,7 @@ def test_performance_of_f1():
 
 If you now run `pytest` and the test passes, nothing will happen — just like with a regular `pytest` test. If the test fails, however, a `perftester.TimeTestError` exception will be thrown, with some additional information.
 
-> `perftester`'s default behavior is to significantly shorten traceback. Therefore, if you use it with `pytest`, you can be a little amazed and disappointed. But it's easy to change this behavior, with just one command: `pt.config.full_traceback()`.
+> `perftester`'s default behavior is to significantly shorten traceback, but only during testing (so when you run `pt.time_test()` and `pt.memory_usage_test()`). You can extend this behavior to other situations, with just one command: `pt.config.cut_traceback()`; to reverse, use `pt.config.full_traceback()` — but do remember that this will *not* mean the full traceback will be used during perftesting.
 
 This is the easiest way to use `perftester`. Its only drawback is that if the performance tests take much time, `pytest` will also take much time, something usually to be avoided. You can then do some `pytest` tricks to not run `perftester` tests, and run them only when you want — or you can simply use the above-described command-line `perftester` framework for performance testing.
 
@@ -436,7 +436,7 @@ In fact, `perftester` is just a simple wrapper around `timeit` and `memory_profi
 
 The default behavior of `perftester` is to **not** include the full traceback when a test does not pass. This is because when running performance tests, you're not interested in finding bugs, and this is what traceback is for. Instead, you want to see which test did not pass and how.
 
-> Remember that if you use `perftester` in an interactive session or inside `pytest`, you may want to change this behavior. You can do it by calling a dedicated method in `pt.config`: `pt.config.full_trace()`.
+> This behavior will not affect any other function than the two `perftester` testing functions: `pt.time_test()` and `pt.memory_usage_test()`. If you want to use this behavior for other functions, too, you can use `pt.config.cut_traceback()`; to reverse, use `pt.config.full_traceback()`.
 
 
 ## Caveats
