@@ -37,8 +37,6 @@ echo -- tests/doctest_config.md
 python -m doctest doctest_config.md
 echo -- tests/doctest_test_sum.md
 python -m doctest doctest_test_sum.md
-echo -- doctest_traceback.md
-python -m doctest doctest_traceback.md
 echo -- doctest_cache.md
 python -m doctest doctest_cache.md
 

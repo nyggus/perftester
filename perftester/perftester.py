@@ -120,8 +120,6 @@ class Config:
         # which rounds numbers to a significant number of digits
         self.digits_for_printing = 4
 
-        self.cut_traceback()
-
         self.log_to_file = True
         self.log_file = Path(os.getcwd()) / "perftester.log"
 
@@ -532,11 +530,13 @@ def time_test(func,
         message="You must provide raw_limit, relative_limit or both",
     )
     _add_func_to_config(func)
+    
 
     results = time_benchmark(
         func, *args, Number=Number, Repeat=Repeat, **kwargs
     )
 
+    config.cut_traceback()
     # Test raw_limit
     if raw_limit is not None:
         check_if(
@@ -561,6 +561,7 @@ def time_test(func,
                 f"minimum time ratio = {rounder.signif(ratio_time, config.digits_for_printing)}"
             ),
         )
+    config.full_traceback()
 
 
 def memory_usage_test(
@@ -632,6 +633,7 @@ def memory_usage_test(
     )
     results = memory_usage_benchmark(func, *args, Repeat=Repeat, **kwargs)
 
+    config.cut_traceback()
     if raw_limit is not None:
         check_if(
             results["max"] <= raw_limit,
@@ -654,6 +656,7 @@ def memory_usage_test(
                 f"{rounder.signif(relatve_got_memory, config.digits_for_printing)}"
             ),
         )
+    config.full_traceback()
 
 
 def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
@@ -772,7 +775,7 @@ def time_benchmark(func, *args, Number=None, Repeat=None, **kwargs):
         raise FunctionError(
             f"The tested function raised {type(e).__name__}: {str(e)}"
         )
-
+    
     min_result = min(results)
 
     # Reload built-in benchmarks

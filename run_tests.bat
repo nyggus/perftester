@@ -20,7 +20,6 @@ python -m doctest doctest_function_str.md
 python -m doctest doctest_function_floats.md
 python -m doctest doctest_config.md
 python -m doctest doctest_test_sum.md
-python -m doctest doctest_traceback.md
 python -m doctest doctest_cache.md
 
 cd ..
