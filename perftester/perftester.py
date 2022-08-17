@@ -530,11 +530,13 @@ def time_test(func,
         message="You must provide raw_limit, relative_limit or both",
     )
     _add_func_to_config(func)
+    
 
     results = time_benchmark(
         func, *args, Number=Number, Repeat=Repeat, **kwargs
     )
 
+    config.cut_traceback()
     # Test raw_limit
     if raw_limit is not None:
         check_if(
@@ -559,6 +561,7 @@ def time_test(func,
                 f"minimum time ratio = {rounder.signif(ratio_time, config.digits_for_printing)}"
             ),
         )
+    config.full_traceback()
 
 
 def memory_usage_test(
