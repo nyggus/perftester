@@ -769,14 +769,12 @@ def time_benchmark(func, *args, Number=None, Repeat=None, **kwargs):
     check_instance(func, Callable, message="Argument func must be a callable.")
     _add_func_to_config(func)
 
-    config.cut_traceback()
     try:
         results = _repeat(func, *args, Number=Number, Repeat=Repeat, **kwargs)
     except Exception as e:
         raise FunctionError(
             f"The tested function raised {type(e).__name__}: {str(e)}"
         )
-    config.full_traceback()
     
     min_result = min(results)
 
