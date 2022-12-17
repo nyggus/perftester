@@ -13,3 +13,4 @@ from .perftester import (
     time_test,
     pp,
 )
+import perftester.understand
