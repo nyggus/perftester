@@ -285,7 +285,7 @@ class Config:
         ]
         self.memory_benchmark = min(max(r) for r in memory_results)
 
-    def set_defaults(self, which, number=None, repeat=None):
+    def set_defaults(self, which, number=None, repeat=None, Number=None, Repeat=None):
         """Change the default settings.
 
         Beware! This does not change particular settings for a particular test,
@@ -302,6 +302,11 @@ class Config:
             repeat (int, optional): passed to timeit.repeat as repeat.
                 Defaults to None.
         """
+        if number is None and Number is not None:
+            number = Number
+        if repeat is None and Repeat is not None:
+            repeat = Repeat
+
         self._check_args(lambda: 0, which, number, repeat)
 
         if number is not None:
@@ -309,7 +314,7 @@ class Config:
         if repeat is not None:
             self.defaults[which]["repeat"] = repeat
 
-    def set(self, func, which, number=None, repeat=None):
+    def set(self, func, which, number=None, repeat=None, Number=None, Repeat=None):
         """Set a particular argument.
 
         Args:
@@ -322,6 +327,11 @@ class Config:
                 as repeat; for memory tests, the number of runs of the test.
                 Defaults to None.
         """
+        if number is None and Number is not None:
+            number = Number
+        if repeat is None and Repeat is not None:
+            repeat = Repeat
+
         self._check_args(func, which, number, repeat)
 
         if func not in self.settings.keys():
@@ -371,6 +381,12 @@ class Config:
                 "For memory tests, you can only set repeat, not number.",
             )
 
+        if number is not None:
+            if int(number) == number:
+                number = int(number)
+        if repeat is not None:
+            if int(repeat) == repeat:
+                repeat = int(repeat)
         check_instance(
             number,
             (int, None),
@@ -380,7 +396,6 @@ class Config:
                 f"{type(number).__name__}"
             ),
         )
-
         check_instance(
             repeat,
             (int, None),
@@ -805,7 +820,7 @@ def pp(*args):
     0.1222
     >>> pp(dict(a=.12121212, b=23.234234234), ["system failure", 345345.345])
     {'a': 0.1212, 'b': 23.23}
-    ['system failure', 345300]
+    ['system failure', 345300.0]
     """
     for arg in args:
         pprint(
