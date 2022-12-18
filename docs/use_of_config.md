@@ -94,7 +94,7 @@ Use this method to change a setting for a particular function:
 For `which="time"`, you can change both settings at the same time:
 
 ```python
->>> pt.config.set(f1, "time", repeat=3, number=1000)
+>>> pt.config.set(f1, "time", Repeat=3, Number=1000)
 >>> pt.config.get_setting(f1, "time", "repeat")
 3
 >>> pt.config.get_setting(f1, "time", "number")
@@ -107,7 +107,7 @@ For `which="time"`, you can change both settings at the same time:
 This method can be used in the very same way as above-described `.set()`, but this one changes the default settings:
 
 ```python
->>> pt.config.set_defaults("time", repeat=3, number=5000)
+>>> pt.config.set_defaults("time", Repeat=3, Number=5000)
 >>> pt.config.defaults
 {'time': {'number': 5000, 'repeat': 3}, 'memory': {'repeat': 1}}
 
@@ -164,7 +164,7 @@ The `.digits_for_printing` controls the way `pp` rounds numbers, but also the wa
 
 >>> pt.config.digits_for_printing = 3
 >>> pt.pp({"a": 1.123123, "b": 3434.3434})
-{'a': 1.12, 'b': 3430}
+{'a': 1.12, 'b': 3430.0}
 
 >>> pt.config.digits_for_printing = 5
 >>> pt.pp({"a": 1.123123, "b": 3434.3434})

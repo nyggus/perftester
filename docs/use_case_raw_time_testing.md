@@ -31,7 +31,7 @@ The first step is import `perftester`:
 This creates object `pt.config`, which all `perftester` functions use, and which you can use to change (or check) settings. We will use `config` to decrease the number of runs of the function, as with the default million of runs we would have to wait way too long:
 
 ```python
->>> pt.config.set(f, "time", repeat=3, number=5)
+>>> pt.config.set(f, "time", Repeat=3, Number=5)
 
 ```
 

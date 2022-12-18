@@ -28,7 +28,7 @@ pt.time_benchmark(foo, x=129, n=100)
 ```
 and this will print the results of the time benchmark, with raw results similar to those that `timeit.repeat()` returns, but unlike it, `pt.time_benchmark()` returns mean raw time per function run, not overall; in additional, you will see some summaries of the results.
 
-The above call did actually run  `timeit.repeat()` function, with the default configuration of `number=100_000` and `repeat=5`. If you want to change any of these, you can use arguments `Number` and `Repeat`, correspondigly:
+The above call did actually run  `timeit.repeat()` function, with the default configuration of `Number=100_000` and `Repeat=5`. If you want to change any of these, you can use arguments `Number` and `Repeat`, correspondigly:
 
 ```python
 pt.time_benchmark(foo, x=129, n=100, Number=1000)
@@ -38,7 +38,7 @@ pt.time_benchmark(foo, x=129, n=100, Number=1000, Repeat=2)
 
 These calls do not change the default settings so you use the arguments' values on the fly. Later you will learn how to change the default settings and the settings for a particular function.
 
-> Some of you may wonder why the `Number` and `Repeat` arguments violate what we can call the Pythonic style, by using a capital first letter for function arguments. The reason is simple: I wanted to minimize a risk of conflicts that would happen when benchmarking (or testing) a function with any of the arguments `number` or `repeat` (or both). A chance that a Python function will have a `Number` or a `Repeat` argument is rather small. If that happens, however, you can use `functools.partial()` to overcome the problem:
+> Some of you may wonder why the `Number` and `Repeat` arguments violate what we can call the Pythonic style, by using a capital first letter for function arguments. The reason is simple: I wanted to minimize a risk of conflicts that would happen when benchmarking (or testing) a function with any of the arguments `Number` or `Repeat` (or both). A chance that a Python function will have a `Number` or a `Repeat` argument is rather small. If that happens, however, you can use `functools.partial()` to overcome the problem:
 
 ```python
 from functools import partial
@@ -196,7 +196,7 @@ To create a performance test for a function, you likely need to know how it beha
 ```python
 >>> import perftester as pt
 >>> def f(n): return sum(map(lambda i: i**0.5, range(n)))
->>> pt.config.set(f, "time", number=1000)
+>>> pt.config.set(f, "time", Number=1000)
 >>> b_100_time = pt.time_benchmark(f, n=100)
 >>> b_100_memory = pt.memory_usage_benchmark(f, n=100)
 >>> b_1000_time = pt.time_benchmark(f, n=1000)
@@ -313,7 +313,7 @@ The whole configuration is stored in the `pt.config` object, which you can easil
 
 ```python
 >>> def f(n): return list(range(n))
->>> pt.config.set(f, "time", number=10_000, repeat=1)
+>>> pt.config.set(f, "time", Number=10_000, Repeat=1)
 
 ```
 
@@ -326,7 +326,7 @@ When you use `perftester` as a command-line tool, you can modify `pt.config` in 
 import perftester as pt
 
 # shorten the tests
-pt.config.set_defaults("time", number=10_000, repeat=3) 
+pt.config.set_defaults("time", Number=10_000, Repeat=3) 
 
 # log the results to file (they will be printed in the console anyway)
 pt.config.log_to_file = True

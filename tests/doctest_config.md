@@ -11,32 +11,32 @@ You can read how to use `pt.config` [here](../docs/use_of_config.md). Below, you
 {'time': {'number': 100000, 'repeat': 5}, 'memory': {'repeat': 1}}
 
 >>> original_defaults = pt.config.defaults
->>> pt.config.set_defaults("time", number=100)
+>>> pt.config.set_defaults("time", Number=100)
 >>> pt.config.defaults
 {'time': {'number': 100, 'repeat': 5}, 'memory': {'repeat': 1}}
 
->>> pt.config.set_defaults("time", repeat=20)
+>>> pt.config.set_defaults("time", Repeat=20)
 >>> pt.config.defaults
 {'time': {'number': 100, 'repeat': 20}, 'memory': {'repeat': 1}}
->>> pt.config.set_defaults("time", repeat=2, number=7)
+>>> pt.config.set_defaults("time", Repeat=2, Number=7)
 >>> pt.config.defaults
 {'time': {'number': 7, 'repeat': 2}, 'memory': {'repeat': 1}}
 
->>> pt.config.set_defaults("memory", repeat=100)
+>>> pt.config.set_defaults("memory", Repeat=100)
 >>> pt.config.defaults
 {'time': {'number': 7, 'repeat': 2}, 'memory': {'repeat': 100}}
 
->>> pt.config.set_defaults("memory", number=100)
+>>> pt.config.set_defaults("memory", Number=100)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
->>> pt.config.set_defaults("memory", number=100, repeat=5)
+>>> pt.config.set_defaults("memory", Number=100, Repeat=5)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
->>> pt.config.set_defaults("memory", repeat=5, number=100)
+>>> pt.config.set_defaults("memory", Repeat=5, Number=100)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
@@ -49,28 +49,28 @@ perftester.perftester.IncorrectArgumentError: For memory tests, you can only set
 
 ```python
 >>> def f(): pass
->>> pt.config.set(f, "time", number=20, repeat=10)
+>>> pt.config.set(f, "time", Number=20, Repeat=10)
 >>> pt.config.settings[f]
 {'memory': {'repeat': 100}, 'time': {'number': 20, 'repeat': 10}}
 
->>> pt.config.set(f, "time", number=50)
+>>> pt.config.set(f, "time", Number=50)
 >>> pt.config.settings[f]
 {'memory': {'repeat': 100}, 'time': {'number': 50, 'repeat': 10}}
 
->>> pt.config.set(f, "time", repeat=5)
+>>> pt.config.set(f, "time", Repeat=5)
 >>> pt.config.settings[f]
 {'memory': {'repeat': 100}, 'time': {'number': 50, 'repeat': 5}}
 
->>> pt.config.set(f, "memory", repeat=5)
+>>> pt.config.set(f, "memory", Repeat=5)
 >>> pt.config.settings[f]
 {'memory': {'repeat': 5}, 'time': {'number': 50, 'repeat': 5}}
 
->>> pt.config.set(f, "memory", number=5)
+>>> pt.config.set(f, "memory", Number=5)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
 
->>> pt.config.set(f, "memory", number=5, repeat=10)
+>>> pt.config.set(f, "memory", Number=5, Repeat=10)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: For memory tests, you can only set repeat, not number.
@@ -80,19 +80,19 @@ perftester.perftester.IncorrectArgumentError: For memory tests, you can only set
 ## Incorrect which argument
 
 ```python
->>> pt.config.set(f, "memorys", repeat=5)
+>>> pt.config.set(f, "memorys", Repeat=5)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: Argument which must be str from among memory, time
->>> pt.config.set(f, "times", repeat=5)
+>>> pt.config.set(f, "times", Repeat=5)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: Argument which must be str from among memory, time
->>> pt.config.set_defaults(f, "memorys", repeat=5)
+>>> pt.config.set_defaults(f, "memorys", Repeat=5)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: Argument which must be str from among memory, time
->>> pt.config.set_defaults(f, "times", repeat=5)
+>>> pt.config.set_defaults(f, "times", Repeat=5)
 Traceback (most recent call last):
     ...
 perftester.perftester.IncorrectArgumentError: Argument which must be str from among memory, time
