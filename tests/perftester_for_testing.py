@@ -11,8 +11,8 @@ def f2():
     pass
 
 
-pt.config.set(f, "time", repeat=1, number=1)
-pt.config.set(f2, "time", repeat=10, number=10_000)
+pt.config.set(f, "time", Repeat=1, Number=1)
+pt.config.set(f2, "time", Repeat=10, Number=10_000)
 
 
 def perftester_f():

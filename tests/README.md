@@ -8,7 +8,7 @@ The `perftester` package uses only the `doctest` framework for unit testing. As 
 
 Initially, [the docs folder](../docs/) contained Markdown files while [the tests folder](./) contained text files (as text files are also a good way of writing doctests). However, it quickly occurred that Markdown files are a little more readable, especially in a browser, so all testing files are now formatted using Markdown. The testing files here, however, has much less explanation, limited mainly to explanation helping the reader understand the tests or some of their aspects.
 
-> Note that `perftester` is now covered by many testes, so it takes some time to run them. Therefore, some examples use low values of `number` and `repeat`, so that the tests do not take an hour or so. In real performance testing, you should use relevant values of these arguments.
+> Note that `perftester` is now covered by many testes, so it takes some time to run them. Therefore, some examples use low values of `Number` and `Repeat`, so that the tests do not take an hour or so. In real performance testing, you should use relevant values of these arguments.
 
 
 ## Operating system

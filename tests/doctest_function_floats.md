@@ -92,7 +92,7 @@ In some tests, we will the following function:
 >>> variance(x_short), variance_2(x_short), variance_3(x_short), variance_4(x_short) #doctest: +ELLIPSIS
 (3.5..., 3.5..., 3.5..., 3.5...)
 
->>> pt.config.set_defaults("time", number=100)
+>>> pt.config.set_defaults("time", Number=100)
 >>> var_perf_time = pt.time_benchmark(variance, x_short)
 >>> var_perf_2_time = pt.time_benchmark(variance_2, x_short)
 >>> var_perf_3_time = pt.time_benchmark(variance_3, x_short)

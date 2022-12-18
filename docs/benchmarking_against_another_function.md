@@ -26,7 +26,7 @@ Let's check the performance of both functions for large `n`, for which the way m
 
 ```python
 >>> import perftester as pt
->>> pt.config.set_defaults("time", number=25, repeat=3) # change defaults - both functions will use these settings
+>>> pt.config.set_defaults("time", Number=25, Repeat=3) # change defaults - both functions will use these settings
 >>> n_for_comparison = 10_000_000
 
 # Actual benchmarks
