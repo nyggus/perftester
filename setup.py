@@ -4,12 +4,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 extras_requirements = {
-    "dev": ["wheel==0.37.1", "black"],
+    "dev": ["wheel", "black"],
 }
 
 setuptools.setup(
     name="perftester",
-    version="0.5.0",
+    version="0.5.1",
     author="Nyggus",
     author_email="nyggus@gmail.com",
     description="Lightweight performance testing in Python",
@@ -22,7 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["easycheck", "rounder", "memory_profiler==0.60.0"],
+    install_requires=["easycheck", "rounder", "memory_profiler"],
     python_requires=">=3.8",
     extras_require=extras_requirements,
     entry_points={"console_scripts": ["perftester = perftester.__main__:main"]},
