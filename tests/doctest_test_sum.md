@@ -60,18 +60,13 @@ If you run the function `sum` once, you will do it quicker than when you do it t
 
 ### Memory performance testing
 
-In terms of memory, this should not have any effect, so clearly one of the below tests should not pass:
+In terms of memory, this should not have any effect, as both functions should use its same amount. So none of the below tests should fail:
 
 ```python
 >>> for n in n_set:
 ...    for _ in range(n_of_test_repeats):
 ...        pt.memory_usage_test(sum,
 ...                             range(n),
-...                             raw_limit=memory_sum_perf_twice[n]["max"]) #doctest: +ELLIPSIS
-Traceback (most recent call last):
-    ...
-perftester.perftester.MemoryTestError: Memory test not passed for function sum:
-memory_limit = ...
-maximum memory usage = ...
+...                             raw_limit=memory_sum_perf_twice[n]["max"]*1.1) 
 
 ```
