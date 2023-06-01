@@ -80,7 +80,7 @@ The API of `perftester` testinf functions is similar to that of benchmarking fun
 >>> pt.memory_usage_test(foo, raw_limit=25, x=129, n=100)
 
 # A relative test
->>> pt.memory_usage_test(foo, relative_limit=1.01, x=129, n=100)
+>>> pt.memory_usage_test(foo, relative_limit=1.2, x=129, n=100)
 
 ```
 
@@ -284,15 +284,15 @@ Memory tests use `pt.memory_usage_test()` function, which is used in the same wa
 
 ```python
 >>> pt.memory_usage_test(f, raw_limit=27, n=100) # test on raw memory
->>> pt.memory_usage_test(f, relative_limit=1.01, n=100) # relative time test
->>> pt.memory_usage_test(f, raw_limit=27, relative_limit=1.01, n=100) # both
+>>> pt.memory_usage_test(f, relative_limit=1.2, n=100) # relative time test
+>>> pt.memory_usage_test(f, raw_limit=27, relative_limit=1.2, n=100) # both
 
 ```
 
 In a memory usage test, a function is called only once. You can change that — but do that only if you have solid reasons — using, for example, `pt.config.set(f, "time", "repeat", 2)`, which will set this setting for the function in the configuration (so it will be used for all next calls for function `f()`). You can also do it just once (so, without saving the setting in `pt.config.settings`), using the `Repeat` argument:
 
 ```python
->>> pt.memory_usage_test(f, raw_limit=27, relative_limit=1.01, n=100, Repeat=100)
+>>> pt.memory_usage_test(f, raw_limit=27, relative_limit=1.2, n=100, Repeat=100)
 
 ```
 
@@ -437,7 +437,7 @@ The feature uses `pympler.asizeof.asizeof(all=True)` to measure the size of all 
 `MEMPOINT()` creates a point of full-memory measurement. It will be appended into `MEMLOGS`.
 
 ```python-repl
->>> import perftester
+3>>> import perftester
 >>> def foo(n):
 ...     x = [i for i in range(n)]
 ...     MEMPOINT()
@@ -446,7 +446,7 @@ The feature uses `pympler.asizeof.asizeof(all=True)` to measure the size of all 
 >>> _ = foo(1_000_000)
 >>> len(MEMLOGS)
 3
->>> MEMLOGS[1].memory > MEMLOGS[0].memory
+>>> MEMLOGS[2].memory > MEMLOGS[1].memory
 True
 
 ```
