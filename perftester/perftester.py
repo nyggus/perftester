@@ -856,9 +856,10 @@ MemLog = namedtuple("MemLog", "ID memory")
 def MEMPRINT():
     """Pretty-print MEMLOGS."""
     for i, memlog in enumerate(MEMLOGS): # type: ignore
+        ID = memlog.ID if memlog.ID else ""
         print(f"{i: < 4} "
-              f"{round(memlog.memory / 1024/1024, 1): <6}→ "
-              f"{memlog.ID}")
+              f"{round(memlog.memory / 1024/1024, 1): <6} → "
+              f"{ID}")
 
 
 def MEMPOINT(ID=None):
