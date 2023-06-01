@@ -32,6 +32,7 @@ import os
 import rounder
 import sys
 import timeit
+import warnings
 
 from collections import namedtuple
 from collections.abc import Callable
@@ -873,10 +874,13 @@ def MEMPOINT(ID=None):
     including module, global and stack frame objects, minus the size
     of `MEMLOGS`.
     """
-    MEMLOGS.append(MemLog( # type: ignore
-            ID,
-            (asizeof(all=True) - asizeof(MEMLOGS))) # type: ignore
-        )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        MEMLOGS.append(MemLog( # type: ignore
+                ID,
+                (asizeof(all=True) - asizeof(MEMLOGS))) # type: ignore
+            )
+
 
 
 def MEMTRACE(func, ID_before=None, ID_after=None):
