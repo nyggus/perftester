@@ -855,7 +855,10 @@ MemLog = namedtuple("MemLog", "ID memory")
 
 def MEMPRINT():
     """Pretty-print MEMLOGS."""
-    pp(MEMLOGS) # type: ignore
+    for i, memlog in enumerate(MEMLOGS): # type: ignore
+        print(f"{i: < 4} "
+              f"{round(memlog.memory / 1024/1024, 1): <6}→ "
+              f"{memlog.ID}")
 
 
 def MEMPOINT(ID=None):
@@ -865,13 +868,13 @@ def MEMPOINT(ID=None):
     MEMLOGS, also available from any module.
     
     Memory is collected using pympler.asizeof.asizeof(), and reported in
-    MB. So, the function measures the size of all current gc objects,
+    bytes. So, the function measures the size of all current gc objects,
     including module, global and stack frame objects, minus the size
     of `MEMLOGS`.
     """
     MEMLOGS.append(MemLog( # type: ignore
             ID,
-            (asizeof(all=True) - asizeof(MEMLOGS)) / 1024/1024) # type: ignore
+            (asizeof(all=True) - asizeof(MEMLOGS))) # type: ignore
         )
 
 
@@ -892,6 +895,7 @@ builtins.__dict__["MEMPOINT"] = MEMPOINT
 builtins.__dict__["MEMPRINT"] = MEMPRINT
 builtins.__dict__["MEMTRACE"] = MEMTRACE
 
+MEMPOINT("perftester import")
 
 
 if __name__ == "__main__":

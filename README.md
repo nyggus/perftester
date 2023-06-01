@@ -413,28 +413,24 @@ You can of course combine both types of tests, and you can do it in a very simpl
 
 Currently, `perftester` contains a beta version (under heavy testing) of a new feature that can be used to trace full memory usage of a Python program.
 
->  Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept. First of all, the feature's API can change.
+>  Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept.
 
-The feature is in a beta version and is currently under testing. It's been added to the package for this very purpose.
-
-It works in the following way. When you import `perftester` — but you need to do it with `import perftester`, not via importing particular objects — you will be able to see new objects in the global space. One of the is `MEMLOGS`:
+The feature works in the following way. When you import `perftester` — but you need to do it with `import perftester`, not via importing particular objects — you will be able to see new objects in the global space. One of the is `MEMLOGS`:
 
 ```python-repl
 >>> import perftester
->>> MEMLOGS
-[]
+>>> MEMLOGS[0].ID
+'perftester import'
 
 ```
 
-It's an empty list for the moment. When you start tracing memory using `perftester`, this list will collected these measurements. You can measure then in two ways. One is via `a MEMPOINT()` function, and another via `LOGMEM` decorator. They, too, are in the global scope, so you can use them in any module, given that `perftester` was imported.
+It's an empty list for the moment. When you start tracing memory using `perftester`, this list will collect the subsequent measurements. You can measure them in two ways. One is via a `MEMPOINT()` function, and another via a  `MEMTRACE` decorator. They, too, are in the global scope, so you can use them in any module inside a session in which `perftester` was already imported.
 
-The  `MEMLOGS` list will contain elements being instances of `MemLog`, which is a `functools.namedtuple `data type, with two attributes:`"ID"`and `"memory"`. This data type is imported with `perftester `, so if you want to use it, you can reach it as `perftester.MemLog`. You don't have to use it, though. Since it's a named tuple, you can treat it as a regular tuple.
+The  `MEMLOGS` list will contain elements being instances of `MemLog`, which is a `functools.namedtuple `data type, with two attributes:`"ID"`and `"memory"`. This data type is imported with `perftester`, so if you want to use it, you can reach it as `perftester.MemLog`. You don't have to use it, though. Since it's a named tuple, you can treat it as a regular tuple.
 
 #### What sort of memory is measured?
 
-The feature uses `pympler.asizeof.asizeof(all=True)` to measure the size of all current gc objects, including module, global and stack frame objects, minus the size of `MEMLOGS`. 
-
-The memory is measured in MB.
+The feature uses `pympler.asizeof.asizeof(all=True)` to measure the size of all current gc objects, including module, global and stack frame objects, minus the size of `MEMLOGS`. The memory is measured in MB.
 
 #### Using `MEMPOINT()`
 
@@ -449,15 +445,17 @@ The memory is measured in MB.
 >>> _ = foo(100)
 >>> _ = foo(1_000_000)
 >>> len(MEMLOGS)
-2
+3
 >>> MEMLOGS[1].memory > MEMLOGS[0].memory
 True
 
 ```
 
-You can use an ID: `MEMPOINT("from sth function")`.
+The last tests checks whether the second measurement — that is, from the function with `n` of a million — uses more memory that the function using `n` of a hundred. Makes sense, and indeed the test passes.
 
-`MEMPOINT()` can be used anywhere inside the code: it's just a point. If you want to trace memory for a function, you can use a `MEMTRACE` decorator:
+When creating a point, you can use an ID, for instance, `MEMPOINT("from sth() function")`.
+
+`MEMPOINT()` can be used to create a point anywhere inside the code. Nevertheless, if you want to trace memory for a function, you can use a `MEMTRACE` decorator:
 
 ```python-repl
 >>> @MEMTRACE
@@ -469,11 +467,35 @@ True
 
 ```
 
+The decorator creates two points: one right before running the test and another right after returning.
+
 The last line tests whether memory before running the function is smaller than that after running it — and given so big `n`, it should be.
+
+Look here:
+
+```python-repl
+>>> @MEMTRACE
+... def bar(n):
+...     x = [i for i in range(n)]
+...     y = [i/3 for i in x]
+...     z = [i/3 for i in y]
+...     MEMPOINT("with x, y, z")
+...     del x
+...     MEMPOINT("without x")
+...     del y
+...     MEMPOINT("without x and y")
+...     del z
+...     MEMPOINT("without x and y and z")
+...     return 
+>>> _ = bar(100_000)
+>>> MEMLOGS[-3].memory > MEMLOGS[-2].memory > MEMLOGS[-1].memory
+True
+
+```
 
 ### Print `MEMLOGS`
 
-You can do whatever you want with `MEMLOGS`. When you want to see this object nicely printed, use the `MEMPRINT()` function, available from the global scope, too. You will see the results printed in a pretty way.
+You can do whatever you want with `MEMLOGS`. However, when you want to see this object nicely printed, use the `MEMPRINT()` function, available from the global scope, too. You will see the results printed in a pretty way, with memory provided in MB.
 
 ### Why the global scope?
 
