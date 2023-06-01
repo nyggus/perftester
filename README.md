@@ -10,12 +10,11 @@ pip install perftester
 
 The package has three external dependencies: [`memory_profiler`](https://pypi.org/project/memory-profiler/) ([repo](https://github.com/pythonprofilers/memory_profiler)), [`easycheck`](https://pypi.org/project/easycheck/) ([repo](https://github.com/nyggus/easycheck)), and [`rounder`](https://pypi.org/project/rounder/) ([repo](https://github.com/nyggus/rounder)).
 
-> `perftester` is still under heavy testing. If you find anything that does not work as intended, please let me know via nyggus <at> gmail.com.
+> `perftester` is still under heavy testing. If you find anything that does not work as intended, please let me know via nyggus `<at>` gmail.com.
 
 ## Pre-introduction: TL;DR
 
 At the most basic level, using `perftester` is simple. It offers you two functions for benchmarking (one for execution time and one for memory), and two functions for performance testing (likewise). Read below for a very short introduction of them. If you want to learn more, however, do not stop there, but read on.
-
 
 ### Benchmarking
 
@@ -26,6 +25,7 @@ import perftester as pt
 def foo(x, n): return [x] * n
 pt.time_benchmark(foo, x=129, n=100)
 ```
+
 and this will print the results of the time benchmark, with raw results similar to those that `timeit.repeat()` returns, but unlike it, `pt.time_benchmark()` returns mean raw time per function run, not overall; in additional, you will see some summaries of the results.
 
 The above call did actually run  `timeit.repeat()` function, with the default configuration of `Number=100_000` and `Repeat=5`. If you want to change any of these, you can use arguments `Number` and `Repeat`, correspondigly:
@@ -101,16 +101,17 @@ That's all in this short introduction. If you're interested in more advanced use
 
 ## Introduction
 
-
 `perftester` is a lightweight package for simple performance testing in Python. Here, performance refers to execution time and memory usage, so performance testing means testing if a function performs quickly enough and does not use too much RAM. In addition, the module offers you simple functions for straightforward benchmarking, in terms of both execution time and memory.
 
 Under the hood, `perftester` is a wrapper around two functions from other modules:
+
 * `perftester.time_benchmark()` and `perftester.time_test()` use `timeit.repeat()`
 * `perftester.memory_usage_benchmark()` and `perftester.memory_usage_test()` use `memory_profiler.memory_usage()`
 
 What `perftester` offers is a testing framework with as simple syntax as possible.
 
 You can use `perftester` in three main ways:
+
 * in an interactive session, for simple benchmarking of functions;
 * as part of another testing framework, like `doctest` or `pytest`s; and
 * as an independent testing framework.
@@ -118,7 +119,6 @@ You can use `perftester` in three main ways:
 The first way is a different type of use from the other two. I use it to learn the behavior of functions (interms of execution time and memory use) I am working on right now, so not for actual testing.
 
 When it comes to actual testing, it's difficult to say which of the last two ways is better or more convinient: it may depend on how many performance tests you have, and how much time they take. If the tests do not take more than a couple of seconds, then you can combine them with unit tests. But if they take much time, you should likely make them independent of unit tests, and run them from time to time.
-
 
 ## Using `perftester`
 
@@ -140,10 +140,9 @@ Read more about using perftester that way [here](docs/use_perftester_as_CLI.md).
 
 > There is no best approach, but remember to choose one that suits your needs.
 
-
 ### Use `perftester` inside `pytest`
 
-This is a very simple approach, perhaps the simplest one: When you use `pytest`, you can simply add `perftester` testing functions to `pytest` testing functions, and that way both frameworks will be combined, or rather the `pytest` framework will run `perftester` tests. The amount of additional work is minimal. 
+This is a very simple approach, perhaps the simplest one: When you use `pytest`, you can simply add `perftester` testing functions to `pytest` testing functions, and that way both frameworks will be combined, or rather the `pytest` framework will run `perftester` tests. The amount of additional work is minimal.
 
 For instance, you can write the following test function:
 
@@ -176,18 +175,15 @@ If you now run `pytest` and the test passes, nothing will happen — just like w
 
 This is the easiest way to use `perftester`. Its only drawback is that if the performance tests take much time, `pytest` will also take much time, something usually to be avoided. You can then do some `pytest` tricks to not run `perftester` tests, and run them only when you want — or you can simply use the above-described command-line `perftester` framework for performance testing.
 
-
 ### Use `perftester` inside `doctest`
 
-In the same way, you can use `perftester` in `doctest`. You will find plenty of examples in the documentation here, and in the [tests/ folder](tests/). 
+In the same way, you can use `perftester` in `doctest`. You will find plenty of examples in the documentation here, and in the [tests/ folder](tests/).
 
-> A great fan of `doctest`ing, I do **not** recommend using `perftester` in docstrings. For me, `doctest`s in docstrings should clarify things and explain how functions work, and adding a performance test to a function's docstring would decrease readability. 
+> A great fan of `doctest`ing, I do **not** recommend using `perftester` in docstrings. For me, `doctest`s in docstrings should clarify things and explain how functions work, and adding a performance test to a function's docstring would decrease readability.
 
 The best way, thus, is to write performance tests as separate `doctest` files, dedicated to performance testing. You can collect such files in a shell script that runs performance tests.
 
-
 ## Basic use of `perftester`
-
 
 ### Simple benchmarking
 
@@ -252,7 +248,6 @@ True
 
 For time tests, we have the `pt.time_test()` function. First, a raw time test:
 
-
 ```python
 >>> pt.time_test(f, raw_limit=2e-05, n=100)
 
@@ -281,8 +276,7 @@ We also can combine both:
 
 ```
 
-You can read about relative testing below, [in section](#raw-and-relative-performance-testing). 
-
+You can read about relative testing below, [in section](#raw-and-relative-performance-testing).
 
 ### Memory testing
 
@@ -305,7 +299,6 @@ In a memory usage test, a function is called only once. You can change that — 
 (There is little sence in repeating this particular function, as you will get almost the same results in each repetition.)
 
 Of course, memory tests do not have to be very useful for functions that do not have to allocate too much memory, but as you will see in other documentation files in `perftester`, some function do use a lot of memory, and such tests do make quite a lot sense for them.
-
 
 ## Configuration: `pt.config`
 
@@ -344,7 +337,6 @@ and so on. You can also change settings in each testing file itself, preferably 
 
 When you use `perftester` in an interactive session, you update `pt.config` in a normal way, in the session. And when you use `perftester` inside `pytest`, you can do it in conftest.py and in each testing function.
 
-
 ## Output
 
 If a test fails, you will see something like this:
@@ -375,7 +367,6 @@ You can locate where a particular test failed, using the module, `perftester_` f
 
 > Like in `pytest`, a recommended approach is to use one performance test per `perftester_` function. This can save you some time and trouble, but also this will ensure that all tests will be run.
 
-
 #### Summary output
 
 At the end, you will see a simple summary of the results, something like this:
@@ -396,14 +387,12 @@ perftester_for_testing.perftester_f2_time_and_memory
 perftester_for_testing.perftester_f_2
 ```
 
-
 ## Relative tests against another function
 
 In the basic use, when you choose a relative benchmark, you compare the performance of your function with that of a built-in (empty) function `pt.config.benchmark_function()`. In most cases, this is what you need. Sometimes, however, you may wish to benchmark against another function. For instance, you may want to build your own function that does the same thing as a Python built-in function, and you want to test (and show) that your function performs better. There are two ways of achieving this:
 
 * you can use a simple trick; [see here](benchmarking_against_another_function.md);
 * you can overwrite the built-in benchmark functions; [see here](change_benchmarking_function.md).
-
 
 ## Raw and relative performance testing
 
@@ -420,6 +409,77 @@ You can of course combine both types of tests, and you can do it in a very simpl
 
 > Warning! Relative results can be different between operating systems.
 
+## Tracing full memory usage
+
+Currently, `perftester` contains a beta version (under heavy testing) of a new feature that can be used to trace full memory usage of a Python program.
+
+>  Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept. First of all, the feature's API can change.
+
+The feature is in a beta version and is currently under testing. It's been added to the package for this very purpose.
+
+It works in the following way. When you import `perftester` — but you need to do it with `import perftester`, not via importing particular objects — you will be able to see new objects in the global space. One of the is `MEMLOGS`:
+
+```python-repl
+>>> import perftester
+>>> MEMLOGS
+[]
+
+```
+
+It's an empty list for the moment. When you start tracing memory using `perftester`, this list will collected these measurements. You can measure then in two ways. One is via `a MEMPOINT()` function, and another via `LOGMEM` decorator. They, too, are in the global scope, so you can use them in any module, given that `perftester` was imported.
+
+The  `MEMLOGS` list will contain elements being instances of `MemLog`, which is a `functools.namedtuple `data type, with two attributes:`"ID"`and `"memory"`. This data type is imported with `perftester `, so if you want to use it, you can reach it as `perftester.MemLog`. You don't have to use it, though. Since it's a named tuple, you can treat it as a regular tuple.
+
+#### What sort of memory is measured?
+
+The feature uses `pympler.asizeof.asizeof(all=True)` to measure the size of all current gc objects, including module, global and stack frame objects, minus the size of `MEMLOGS`. 
+
+The memory is measured in MB.
+
+#### Using `MEMPOINT()`
+
+`MEMPOINT()` creates a point of full-memory measurement. It will be appended into `MEMLOGS`.
+
+```python-repl
+>>> import perftester
+>>> def foo(n):
+...     x = [i for i in range(n)]
+...     MEMPOINT()
+...     return x
+>>> _ = foo(100)
+>>> _ = foo(1_000_000)
+>>> len(MEMLOGS)
+2
+>>> MEMLOGS[1].memory > MEMLOGS[0].memory
+True
+
+```
+
+You can use an ID: `MEMPOINT("from sth function")`.
+
+`MEMPOINT()` can be used anywhere inside the code: it's just a point. If you want to trace memory for a function, you can use a `MEMTRACE` decorator:
+
+```python-repl
+>>> @MEMTRACE
+... def bar(n):
+...     return [i for i in range(n)]
+>>> _ = bar(1_000_000)
+>>> MEMLOGS[-2].memory < MEMLOGS[-1].memory
+True
+
+```
+
+The last line tests whether memory before running the function is smaller than that after running it — and given so big `n`, it should be.
+
+### Print `MEMLOGS`
+
+You can do whatever you want with `MEMLOGS`. When you want to see this object nicely printed, use the `MEMPRINT()` function, available from the global scope, too. You will see the results printed in a pretty way.
+
+### Why the global scope?
+
+Since this feature of `perftester` is to be used to debug memory use from various modules, it'd be inconvinient to import the required objects in all these modules. That's why for the moment, the required objects are kept in the global scope — but this can change in future versions.
+
+If you have any comments about this, please share them via Issues of the package's repository.
 
 ## Other tools
 
@@ -428,9 +488,8 @@ Of course, Python comes with various powerful tools for profiling, benchmarking 
 * [`cProfile` and `profile`](https://docs.python.org/3/library/profile.html), the built-in powerful tools for deterministic profiling
 * [the built-in `timeit` module](https://docs.python.org/3/library/timeit.html), for benchmarking
 * [`memory_profiler`](https://pypi.org/project/memory-profiler/), a powerful memory profiler (`memory_profiler` is utilized by `perftester`)
-  
-In fact, `perftester` is just a simple wrapper around `timeit` and `memory_profiler`, since `perftester` itself does not come with its own solutions. It simply uses these functions and offers an easy-to-use API to benchmark and test memory and time performance.
 
+In fact, `perftester` is just a simple wrapper around `timeit` and `memory_profiler`, since `perftester` itself does not come with its own solutions. It simply uses these functions and offers an easy-to-use API to benchmark and test memory and time performance.
 
 ## Manipulating the traceback
 
@@ -438,18 +497,15 @@ The default behavior of `perftester` is to **not** include the full traceback wh
 
 > This behavior will not affect any other function than the two `perftester` testing functions: `pt.time_test()` and `pt.memory_usage_test()`. If you want to use this behavior for other functions, too, you can use `pt.config.cut_traceback()`; to reverse, use `pt.config.full_traceback()`.
 
-
 ## Caveats
 
 * `perftester` does not work with multiple threads or processes.
 * `perftester` is still in a beta version and so is still under testing.
 * Watch out when you're running the same test in different operating systems. Even relative tests can differ from OS to OS.
 
-
 ## Operating systems
 
 The package is developed in Linux (actually, under WSL) and checked in Windows 10, so it works in both these environments.
-
 
 ## Support
 

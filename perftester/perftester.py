@@ -26,6 +26,7 @@ You can change this behavior, however:
 Let's return to previous settings:
 >>> pt.config.digits_for_printing = 4
 """
+import builtins
 import copy
 import os
 import rounder
@@ -42,9 +43,11 @@ from easycheck import (
     check_if_paths_exist,
     assert_instance,
 )
+from functools import wraps
 from memory_profiler import memory_usage
 from pathlib import Path
 from pprint import pprint
+from pympler.asizeof import asizeof
 from statistics import mean
 
 
@@ -840,6 +843,55 @@ def _add_func_to_config(func):
         config.settings[func]["memory"] = dict(
             repeat=config.defaults["memory"]["repeat"],
         )
+
+
+# Full memory measurement
+
+builtins.__dict__["MEMLOGS"] = []
+
+
+MemLog = namedtuple("MemLog", "ID memory")
+
+
+def MEMPRINT():
+    """Pretty-print MEMLOGS."""
+    pp(MEMLOGS) # type: ignore
+
+
+def MEMPOINT(ID=None):
+    """Global function to measure full memory and log it into MEMLOGS.
+    
+    The function is available from any module of a session. It logs into
+    MEMLOGS, also available from any module.
+    
+    Memory is collected using pympler.asizeof.asizeof(), and reported in
+    MB. So, the function measures the size of all current gc objects,
+    including module, global and stack frame objects, minus the size
+    of `MEMLOGS`.
+    """
+    MEMLOGS.append(MemLog( # type: ignore
+            ID,
+            (asizeof(all=True) - asizeof(MEMLOGS)) / 1024/1024) # type: ignore
+        )
+
+
+def MEMTRACE(func, ID_before=None, ID_after=None):
+    """Decorator to log memory before and after running a function."""
+    @wraps(func)
+    def inner(*args, **kwargs):
+        before = ID_before if ID_before else f"Before {func.__name__}()"
+        MEMPOINT(before)
+        f = func(*args, **kwargs)
+        after = ID_after if ID_after else f"After {func.__name__}()"
+        MEMPOINT(after)
+        return f
+    return inner
+
+
+builtins.__dict__["MEMPOINT"] = MEMPOINT
+builtins.__dict__["MEMPRINT"] = MEMPRINT
+builtins.__dict__["MEMTRACE"] = MEMTRACE
+
 
 
 if __name__ == "__main__":
