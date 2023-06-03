@@ -507,7 +507,7 @@ def time_test(func,
     >>> time_test(f, raw_limit=1e-10, n=1000) #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftester.TimeTestError: Time test not passed for function f:
+    TimeTestError: Time test not passed for function f:
     raw_limit = 1e-10
     minimum run time = ...
 
@@ -520,7 +520,7 @@ def time_test(func,
     >>> time_test(f, relative_limit=1, n=10) #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftester.TimeTestError: Time test not passed for function f:
+    TimeTestError: Time test not passed for function f:
     relative_limit = 1
     minimum time ratio = ...
 
@@ -538,7 +538,7 @@ def time_test(func,
     >>> time_test(f, relative_limit=.1, n=10)  #doctest: +ELLIPSIS
     Traceback (most recent call last):
        ...
-    perftester.TimeTestError: Time test not passed for function f:
+    TimeTestError: Time test not passed for function f:
     relative_limit = 0.1
     minimum time ratio = ...
 
@@ -906,4 +906,9 @@ MEMPOINT("perftester import")
 if __name__ == "__main__":
     import doctest
 
+    flags = flags = (
+        doctest.ELLIPSIS
+        | doctest.NORMALIZE_WHITESPACE
+        | doctest.IGNORE_EXCEPTION_DETAIL
+    )
     doctest.testmod()
