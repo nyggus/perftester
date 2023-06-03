@@ -31,18 +31,21 @@ TIME_MEAN = "time spent inside (mean)"
 
 # Exceptions
 
+
 class IncorrectDictRepresentationError(Exception):
     pass
 
 
 # Performance decorators
 
+
 def time_performance(func: Callable) -> Callable:
     """Time performance decorator.
-    
+
     It is used to analyze the performance of the decorated function in terms
     of execution time.
     """
+
     @wraps(func)
     def inner(*args, **kwargs):
         _type, function = _get_type_and_name(func)
@@ -53,12 +56,12 @@ def time_performance(func: Callable) -> Callable:
             arguments = _stringify_args_kwargs(aargs, kwargs)
         else:
             arguments = _stringify_args_kwargs(args, kwargs)
-        
+
         global calls
-        
+
         call_type = INSTANCEMODE if _type == "class" else CALLMODE
         call_count = INSTANCES if _type == "class" else CALLS
-        
+
         if not calls.registered[_type].get(function, False):
             calls.registered[_type][function] = {}
             calls.registered[_type][function][call_type] = {}
@@ -66,7 +69,7 @@ def time_performance(func: Callable) -> Callable:
         calls.registered[_type][function][call_count] = (
             calls.registered[_type][function].get(call_count, 0) + 1
         )
-        
+
         start = perf_counter()
         ret = func(*args, **kwargs)
         end = perf_counter()
@@ -75,22 +78,20 @@ def time_performance(func: Callable) -> Callable:
         calls.registered[_type][function][call_type][ID] = {
             CALLEDFROM: inspect.stack()[1][3],
         }
-        calls.registered[_type][function][call_type][ID][TIME] = (
-            rounder.signif_object(end - start, 5)
-        )
-        calls.registered[_type][function][call_type][ID]["call"] = f"{function}({arguments})"
-        calls.registered[_type][function][TIME_ALL] = (
-            calls
-                .registered[_type][function]
-                .get(TIME_ALL, 0)
-            + (end - start)
-        )
-        calls.registered[_type][function][TIME_MEAN] = (
-            calls.registered[_type][function][TIME_ALL] /
-            (
-                calls.registered[_type][function].get(CALLS, None)
-                or calls.registered[_type][function][INSTANCES]
-            )
+        calls.registered[_type][function][call_type][ID][
+            TIME
+        ] = rounder.signif_object(end - start, 5)
+        calls.registered[_type][function][call_type][ID][
+            "call"
+        ] = f"{function}({arguments})"
+        calls.registered[_type][function][TIME_ALL] = calls.registered[_type][
+            function
+        ].get(TIME_ALL, 0) + (end - start)
+        calls.registered[_type][function][TIME_MEAN] = calls.registered[_type][
+            function
+        ][TIME_ALL] / (
+            calls.registered[_type][function].get(CALLS, None)
+            or calls.registered[_type][function][INSTANCES]
         )
         return ret
 
@@ -99,7 +100,7 @@ def time_performance(func: Callable) -> Callable:
 
 def memory_performance(func: Callable) -> Callable:
     """Memory performance decorator.
-    
+
     It is used to analyze the performance of the decorated function in terms
     of memory usage.
     """
@@ -113,12 +114,12 @@ def memory_performance(func: Callable) -> Callable:
             arguments = _stringify_args_kwargs(aargs, kwargs)
         else:
             arguments = _stringify_args_kwargs(args, kwargs)
-        
+
         global calls
-        
+
         call_type = INSTANCEMODE if _type == "class" else CALLMODE
         call_count = INSTANCES if _type == "class" else CALLS
-        
+
         if not calls.registered[_type].get(function, False):
             calls.registered[_type][function] = {}
             calls.registered[_type][function][call_type] = {}
@@ -128,22 +129,20 @@ def memory_performance(func: Callable) -> Callable:
         )
         memory_results, ret = memory_usage((func, args, kwargs), retval=True)
         peak_memory = min(memory_results)
-        
+
         ID = calls.registered[_type][function][call_count]
         calls.registered[_type][function][call_type][ID] = {
             CALLEDFROM: inspect.stack()[1][3],
         }
-        calls.registered[_type][function][call_type][ID][MEM] = (
-            peak_memory
-        )
-        calls.registered[_type][function][call_type][ID]["call"] = f"{function}({arguments})"
+        calls.registered[_type][function][call_type][ID][MEM] = peak_memory
+        calls.registered[_type][function][call_type][ID][
+            "call"
+        ] = f"{function}({arguments})"
         calls.registered[_type][function][MEM] = max(
             # current max
-            calls
-                .registered[_type][function]
-                .get(MEM, 0),
+            calls.registered[_type][function].get(MEM, 0),
             # current memory_peak
-            peak_memory
+            peak_memory,
         )
         return ret
 
@@ -152,35 +151,46 @@ def memory_performance(func: Callable) -> Callable:
 
 # Class containing all the registered calls and class instances.
 
+
 class Calls:
     __slots__ = ("registered", "analyze", "save", "read")
-    
+
     def __init__(self):
-        self.registered: dict = {"class": {}, "class method": {}, "function": {}}
-    
+        self.registered: dict = {
+            "class": {},
+            "class method": {},
+            "function": {},
+        }
+
     def show(self, digits=4, indent=4):
-        rounded_calls = rounder.signif_object(self.registered,
-                                              use_copy=True,
-                                              digits=digits)
+        rounded_calls = rounder.signif_object(
+            self.registered, use_copy=True, digits=digits
+        )
         print("Classes:\n", json.dumps(rounded_calls["class"], indent=indent))
-        print("Class methods:\n", json.dumps(rounded_calls["class method"], indent=indent))
-        print("Functions:\n", json.dumps(rounded_calls["function"], indent=indent))
+        print(
+            "Class methods:\n",
+            json.dumps(rounded_calls["class method"], indent=indent),
+        )
+        print(
+            "Functions:\n",
+            json.dumps(rounded_calls["function"], indent=indent),
+        )
 
     def __repr__(self):
         if not self.registered.keys():
             return "No registered calls"
-        
+
         instances = self._get_count("class")
         method_calls = self._get_count("class method")
         func_calls = self._get_count("function")
-        
+
         return (
             "Registered:\n"
             f"  * {instances} class instances\n"
             f"  * {method_calls} class methods\n"
             f"  * {func_calls} function calls\n"
         )
-    
+
     def _get_count(self, which):
         calls = 0
         if self.registered[which]:
@@ -192,10 +202,11 @@ class Calls:
 
 class CallsAnalyzer:
     """Class to analyze Calls.registered.
-    
+
     This is a simple analyzer. A more adanced one will be offered
     in a dedicated understand extension.
     """
+
     def _update_calls(self):
         global calls
         self.calls = calls.registered
@@ -210,12 +221,12 @@ class CallsAnalyzer:
         if summary_calls["class"]:
             for k in summary_calls["class"]:
                 _ = summary_calls["class"][k].pop(INSTANCEMODE)
-            
+
         summary_calls = rounder.signif_object(summary_calls, digits=digits)
         return summary_calls
 
     summarise = summarize
-    
+
 
 class CallsSaver:
     def _update(self):
@@ -227,7 +238,7 @@ class CallsSaver:
         json_dict = json.dumps(self.calls)
         with open(path, "w") as json_file:
             json_file.write(json_dict)
-    
+
     def to_text(self, path: Union[str, pathlib.Path]):
         self._update()
         with open(path, "w") as text_file:
@@ -236,10 +247,13 @@ class CallsSaver:
     def to_pickle(self, path: Union[str, pathlib.Path]):
         self._update()
         with open(path, "wb") as pickle_file:
-            pickle.dump(self.calls, pickle_file, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(
+                self.calls, pickle_file, protocol=pickle.HIGHEST_PROTOCOL
+            )
 
 
-class IncorrectCallsInstanceError(Exception): ...
+class IncorrectCallsInstanceError(Exception):
+    ...
 
 
 CallsInstance = namedtuple("CallsInstance", "type registered")
@@ -255,7 +269,7 @@ class CallsReader:
             expected_type=dict,
             handle_with=IncorrectDictRepresentationError,
             message=f"Object parsed from {path} is not a dict but"
-                    f" a {type(obj).__name__}"
+            f" a {type(obj).__name__}",
         )
         # check if the required keys are there
         return self._get_type_of_calls(obj)
@@ -275,12 +289,12 @@ class CallsReader:
                     return "memory"
         raise IncorrectCallsInstanceError(
             "The object is neither Time nor Memory Calls dictionary."
-            )
+        )
 
     def from_json(self, path: Union[str, pathlib.Path]):
         with open(path) as jsonfile:
             registered = json.load(jsonfile)
-        
+
         # use int IDs (used as keys) instead of str,
         # which is used by json.load
         for _type in ["class", "class method", "function"]:
@@ -288,11 +302,13 @@ class CallsReader:
             for method in registered[_type]:
                 registered[_type][method][calls] = {
                     int(instance): value
-                    for instance, value in registered[_type][method][calls].items()
+                    for instance, value in registered[_type][method][
+                        calls
+                    ].items()
                 }
         return CallsInstance(
             type=self._check_calls_object(registered, path),
-            registered=registered
+            registered=registered,
         )
 
     def from_text(self, path: Union[str, pathlib.Path]):
@@ -304,19 +320,19 @@ class CallsReader:
         self._check_calls_object(obj_from_text, path)
         return CallsInstance(
             type=self._check_calls_object(obj_from_text, path),
-            registered=obj_from_text
+            registered=obj_from_text,
         )
 
     def from_pickle(self, path: Union[str, pathlib.Path]):
         with open(path, "rb") as pickle_file:
             pkl = pickle.load(pickle_file)
         return CallsInstance(
-            type=self._check_calls_object(pkl, path),
-            registered=pkl
+            type=self._check_calls_object(pkl, path), registered=pkl
         )
 
 
 # Helpers
+
 
 def _is_class(obj):
     return repr(obj).startswith("<class")
@@ -339,18 +355,18 @@ def _get_type_and_name(obj):
 
 def type_and_len_of_iterable(it, max_len=1000):
     """Get length of an iterable.
-    
+
     The iterable is copied first, and the function works
     on the deep copy. For generators expressions, the function
     returns "generator" as cannot get its length without emptying
     the original generator.
-    
+
     If maximum_len is reached, instead of the actual length, the function
     returns "over {max_len}", to make the function cheap.
     """
     # Get length, based on copy
     it_copy = deepcopy(it)
-    
+
     c = 0
     max_len_reached = False
     for i in it_copy:
@@ -443,16 +459,27 @@ def _stringify_args_kwargs(args, kwargs, digits=4):
             a = _add_quotes_to_str(rounder.signif_object(args[0], digits))
             arguments = f"{a}"
         else:
-            to_join = [str(_add_quotes_to_str(rounder.signif_object(a, digits))) for a in args]
+            to_join = [
+                str(_add_quotes_to_str(rounder.signif_object(a, digits)))
+                for a in args
+            ]
             arguments = f"{', '.join(to_join)}"
     elif len(kwargs) > 0 and len(args) == 0:
-        a = ", ".join(f"{k}={str(_add_quotes_to_str(rounder.signif_object(v, digits)))}" for k, v in kwargs.items())
-        arguments = f'{a}'
+        a = ", ".join(
+            f"{k}={str(_add_quotes_to_str(rounder.signif_object(v, digits)))}"
+            for k, v in kwargs.items()
+        )
+        arguments = f"{a}"
     elif len(kwargs) > 0 and len(args) > 0:
         if len(args) == 1:
-            arguments = f"{_add_quotes_to_str(rounder.signif_object(args[0], digits))}"
+            arguments = (
+                f"{_add_quotes_to_str(rounder.signif_object(args[0], digits))}"
+            )
         else:
-            to_join = [str(_add_quotes_to_str(rounder.signif_object(a, digits))) for a in args]
+            to_join = [
+                str(_add_quotes_to_str(rounder.signif_object(a, digits)))
+                for a in args
+            ]
             arguments = f"{', '.join(to_join)}"
         if len(kwargs) == 1:
             key = next(iter(kwargs))
