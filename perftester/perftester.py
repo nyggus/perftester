@@ -89,6 +89,7 @@ class Config:
     It is a singleton whose instance is created once, during import
     of the perftester module.
     """
+
     config_file = Path("config_perftester.py")
     _instance = None
 
@@ -289,7 +290,9 @@ class Config:
         ]
         self.memory_benchmark = min(max(r) for r in memory_results)
 
-    def set_defaults(self, which, number=None, repeat=None, Number=None, Repeat=None):
+    def set_defaults(
+        self, which, number=None, repeat=None, Number=None, Repeat=None
+    ):
         """Change the default settings.
 
         Beware! This does not change particular settings for a particular test,
@@ -318,7 +321,9 @@ class Config:
         if repeat is not None:
             self.defaults[which]["repeat"] = repeat
 
-    def set(self, func, which, number=None, repeat=None, Number=None, Repeat=None):
+    def set(
+        self, func, which, number=None, repeat=None, Number=None, Repeat=None
+    ):
         """Set a particular argument.
 
         Args:
@@ -456,13 +461,14 @@ def _repeat(func, *args, Number=None, Repeat=None, **kwargs):
     return [r / number for r in repeat_results]
 
 
-def time_test(func,
-              *args,
-              raw_limit=None,
-              relative_limit=None,
-              Number=None,
-              Repeat=None,
-              **kwargs
+def time_test(
+    func,
+    *args,
+    raw_limit=None,
+    relative_limit=None,
+    Number=None,
+    Repeat=None,
+    **kwargs,
 ):
     """Run time performance test for func.
 
@@ -549,7 +555,6 @@ def time_test(func,
         message="You must provide raw_limit, relative_limit or both",
     )
     _add_func_to_config(func)
-    
 
     results = time_benchmark(
         func, *args, Number=Number, Repeat=Repeat, **kwargs
@@ -584,7 +589,12 @@ def time_test(func,
 
 
 def memory_usage_test(
-    func, *args, raw_limit=None, relative_limit=None, Repeat=None, **kwargs,
+    func,
+    *args,
+    raw_limit=None,
+    relative_limit=None,
+    Repeat=None,
+    **kwargs,
 ):
     """Test memory usage of a function.
 
@@ -794,7 +804,7 @@ def time_benchmark(func, *args, Number=None, Repeat=None, **kwargs):
         raise FunctionError(
             f"The tested function raised {type(e).__name__}: {str(e)}"
         )
-    
+
     min_result = min(results)
 
     # Reload built-in benchmarks
@@ -856,19 +866,21 @@ MemLog = namedtuple("MemLog", "ID memory")
 
 def MEMPRINT():
     """Pretty-print MEMLOGS."""
-    for i, memlog in enumerate(MEMLOGS): # type: ignore
+    for i, memlog in enumerate(MEMLOGS):  # type: ignore
         ID = memlog.ID if memlog.ID else ""
-        print(f"{i: < 4} "
-              f"{round(memlog.memory / 1024/1024, 1): <6} → "
-              f"{ID}")
+        print(
+            f"{i: < 4} "
+            f"{round(memlog.memory / 1024/1024, 1): <6} → "
+            f"{ID}"
+        )
 
 
 def MEMPOINT(ID=None):
     """Global function to measure full memory and log it into MEMLOGS.
-    
+
     The function is available from any module of a session. It logs into
     MEMLOGS, also available from any module.
-    
+
     Memory is collected using pympler.asizeof.asizeof(), and reported in
     bytes. So, the function measures the size of all current gc objects,
     including module, global and stack frame objects, minus the size
@@ -876,15 +888,16 @@ def MEMPOINT(ID=None):
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        MEMLOGS.append(MemLog( # type: ignore
-                ID,
-                (asizeof(all=True) - asizeof(MEMLOGS))) # type: ignore
-            )
-
+        MEMLOGS.append(
+            MemLog(  # type: ignore
+                ID, (asizeof(all=True) - asizeof(MEMLOGS))
+            )  # type: ignore
+        )
 
 
 def MEMTRACE(func, ID_before=None, ID_after=None):
     """Decorator to log memory before and after running a function."""
+
     @wraps(func)
     def inner(*args, **kwargs):
         before = ID_before if ID_before else f"Before {func.__name__}()"
@@ -893,6 +906,7 @@ def MEMTRACE(func, ID_before=None, ID_after=None):
         after = ID_after if ID_after else f"After {func.__name__}()"
         MEMPOINT(after)
         return f
+
     return inner
 
 
@@ -906,4 +920,9 @@ MEMPOINT("perftester import")
 if __name__ == "__main__":
     import doctest
 
-    doctest.testmod()
+    flags = flags = (
+        doctest.ELLIPSIS
+        | doctest.NORMALIZE_WHITESPACE
+        | doctest.IGNORE_EXCEPTION_DETAIL
+    )
+    doctest.testmod(optionflags=flags)
