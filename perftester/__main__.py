@@ -26,9 +26,13 @@ def main():
         for func in perftester_functions:
             this_test = _perftester(module_name, func)
             if this_test:
-                failed_perftesters.append(f"{str(module_name)}.{func.__name__}")
+                failed_perftesters.append(
+                    f"{str(module_name)}.{func.__name__}"
+                )
             else:
-                passed_perftesters.append(f"{str(module_name)}.{func.__name__}")
+                passed_perftesters.append(
+                    f"{str(module_name)}.{func.__name__}"
+                )
 
     test_results = TestResults(
         passed_tests=passed_perftesters, failed_tests=failed_perftesters
@@ -43,7 +47,9 @@ def _read_cli_args():
         # sys.argv[1] is always a string, so no need to check it
         path = pathlib.Path(sys.argv[1])
     check_if_paths_exist(
-        path, CLIPathError, "Incorrent path provided with perftester CLI command"
+        path,
+        CLIPathError,
+        "Incorrent path provided with perftester CLI command",
     )
     if path.is_dir():
         files = _find_perftester_files(path)
