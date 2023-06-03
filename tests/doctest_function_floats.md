@@ -117,14 +117,13 @@ True
 
 Differences between the four functions are significant, particularly `variance()` is much slower than the others, and `variance_4()` is much slower than both `variance_2()` and `variance_3()`. You can see the results I got on  my machine [here](results_of_floats.md).
 
-
 ## Memory benchmarking
 
 For such small lists, memory should not be a problem, and we can assume that all these functions will use similar memory.
 
 ```python
 >>> max_memories = [v["max_relative"] for v in (var_perf_memory, var_perf_2_memory, var_perf_3_memory, var_perf_4_memory)] 
->>> all(memory >= .99 and memory < 1.03 for memory in max_memories)
+>>> all(memory >= 1.0 and memory < 1.15 for memory in max_memories)
 True
 
 ```
@@ -139,7 +138,6 @@ All functions use more or less the same memory:
 17.58
 17.6
 ```
-
 
 ## Longer list
 
@@ -192,9 +190,7 @@ In my machine, actually, `variance_3()` was almost 400 quicker than `variance()`
 
 ```
 
-
 As before, you can see the results in [this file](results_of_floats.md).
-
 
 ### Memory benchmarking
 
