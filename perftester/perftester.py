@@ -66,27 +66,27 @@ class CLIPathError(Exception):
 
 
 class LogFilePathError(Exception):
-    """Exception class to be used when incorrect path is provided for a log file."""
+    """Incorrect path provided for a log file."""
 
 
 class LackingLimitsError(Exception):
-    """Exception class to be used when no limits are set for a test."""
+    """No limits has been set for test."""
 
 
 class IncorrectArgumentError(Exception):
-    """Exception class to be used when function args are incorrect."""
+    """Function arguments are incorrect."""
 
 
 class TimeTestError(Exception):
-    """Exception class to be used when time_test() does not pass."""
+    """The time test has not passed."""
 
 
 class MemoryTestError(Exception):
-    """Exception class to be used when memory_usage_test() does not pass."""
+    """The memory usage test has not passed."""
 
 
 class FunctionError(Exception):
-    """Exception class to be used when the tested code throws an error."""
+    """The tested code has thrown an error."""
 
 
 # Configuration
