@@ -48,7 +48,7 @@ from easycheck import (
     check_if_not,
     check_instance,
     check_if_paths_exist,
-    assert_instance,
+    assert_instance, # required for doctests
 )
 from functools import wraps
 from memory_profiler import memory_usage
