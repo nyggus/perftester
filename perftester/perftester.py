@@ -11,6 +11,12 @@ the results, it does not so in perftester.
 Remember that all lambda functions are stored as anonymous functions,
 without a name. Hence it's better to avoid using lambdas in perftester.
 
+WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
+perftester provides data in MB. That way, the data from 
+memory_profiler.memory_usage() and pympler.asizeof.asizeof() are provided in
+the same units. If you want to recalculate the data to MiB, you can divide the
+memory by perftester.MiB_TO_MB_FACTOR.
+
 For the sake of pretty-printing the benchmarks, perftester comes with a pp
 function, which rounds all numbers to four significant digits and prints
 the object using pprint.pprint:
@@ -50,6 +56,9 @@ from pathlib import Path
 from pprint import pprint
 from pympler.asizeof import asizeof
 from statistics import mean
+
+
+MiB_TO_MB_FACTOR = 1.048576
 
 
 class CLIPathError(Exception):
@@ -288,7 +297,7 @@ class Config:
             memory_usage((self.benchmark_function, (), {}))
             for _ in range(self.defaults["memory"]["repeat"])
         ]
-        self.memory_benchmark = min(max(r) for r in memory_results)
+        self.memory_benchmark = MiB_TO_MB_FACTOR * min(max(r) for r in memory_results)
 
     def set_defaults(
         self, which, number=None, repeat=None, Number=None, Repeat=None
@@ -608,6 +617,9 @@ def memory_usage_test(
     When you use Repeat, it has a higher priority than the corresponding
     setting from config.settings, and it will be used. This is used in this
     single call only, and so it does not overwrite the config settings.
+    
+    WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
+    perftester provides data in MB.
 
     Args:
         func (Callable): the tested function.
@@ -702,6 +714,9 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     single call only, and so it does not overwrite the config settings.
 
     The function returns a dict that you can pretty-print using function pp().
+    
+    WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
+    perftester provides data in MB.
 
     Args:
         func (Callable): a function (or a callable) to run benchmarks for
@@ -724,13 +739,23 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     n = Repeat or config.settings[func]["memory"]["repeat"]
 
     try:
-        memory_results = [memory_usage((func, args, kwargs)) for i in range(n)]
+        memory_results = [
+            memory_usage((func, args, kwargs))
+            for i in range(n)
+        ]
     except Exception as e:
         raise FunctionError(
             f"The tested function raised {type(e).__name__}: {str(e)}"
         )
 
-    memory_results_mean = [mean(this_result) for this_result in memory_results]
+    for i, result in enumerate(memory_results):
+        for j, _ in enumerate(result):
+            memory_results[i][j] *= MiB_TO_MB_FACTOR
+
+    memory_results_mean = [
+        mean(this_result)
+        for this_result in memory_results
+    ]
     memory_results_max = [max(this_result) for this_result in memory_results]
     overall_mean = mean(memory_results_mean)
     # We take the min of the max values
@@ -740,6 +765,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     for i, result in enumerate(relative_results):
         for j, r in enumerate(result):
             relative_results[i][j] = r / config.memory_benchmark
+            
     return {
         "raw_results": memory_results,
         "relative_results": relative_results,
