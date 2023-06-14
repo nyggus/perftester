@@ -46,7 +46,7 @@ from easycheck import (
     check_argument,
     check_if,
     check_if_not,
-    check_instance,
+    check_type,
     check_if_paths_exist,
     assert_instance, # required for doctests
 )
@@ -143,7 +143,7 @@ class Config:
 
     @digits_for_printing.setter
     def digits_for_printing(self, value):
-        check_instance(
+        check_type(
             value,
             int,
             message=f"Argument value must be an int, not {type(value).__name__}",
@@ -156,7 +156,7 @@ class Config:
 
     @log_to_file.setter
     def log_to_file(self, value):
-        check_instance(
+        check_type(
             value,
             bool,
             message=f"Argument value must be an int, not {type(value).__name__}",
@@ -224,7 +224,7 @@ class Config:
         """
         whiches = ("time", "memory")
         items = ("number", "repeat")
-        check_instance(
+        check_type(
             func,
             Callable,
             IncorrectArgumentError,
@@ -371,7 +371,7 @@ class Config:
 
     def _check_args(self, func, which, number, repeat):
         """Check instances of arguments func, which, number and repeat."""
-        check_instance(
+        check_type(
             func,
             Callable,
             IncorrectArgumentError,
@@ -405,7 +405,7 @@ class Config:
         if repeat is not None:
             if int(repeat) == repeat:
                 repeat = int(repeat)
-        check_instance(
+        check_type(
             number,
             (int, None),
             IncorrectArgumentError,
@@ -414,7 +414,7 @@ class Config:
                 f"{type(number).__name__}"
             ),
         )
-        check_instance(
+        check_type(
             repeat,
             (int, None),
             IncorrectArgumentError,
@@ -661,7 +661,7 @@ def memory_usage_test(
     True
     >>> memory_usage_test(sum1, raw_limit=first_run['max']*2, n=100_000)
     """
-    check_instance(
+    check_type(
         func,
         Callable,
         IncorrectArgumentError,
@@ -733,7 +733,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     >>> f_bench.keys()
     dict_keys(['raw_results', 'relative_results', 'mean_result_per_run', 'max_result_per_run', 'max_result_per_run_relative', 'mean', 'max', 'max_relative'])
     """
-    check_instance(func, Callable, message="Argument func must be a callable.")
+    check_type(func, Callable, message="Argument func must be a callable.")
     _add_func_to_config(func)
 
     n = Repeat or config.settings[func]["memory"]["repeat"]
@@ -821,7 +821,7 @@ def time_benchmark(func, *args, Number=None, Repeat=None, **kwargs):
     True
 
     """
-    check_instance(func, Callable, message="Argument func must be a callable.")
+    check_type(func, Callable, message="Argument func must be a callable.")
     _add_func_to_config(func)
 
     try:
@@ -861,13 +861,84 @@ def pp(*args):
     >>> pp(dict(a=.12121212, b=23.234234234), ["system failure", 345345.345])
     {'a': 0.1212, 'b': 23.23}
     ['system failure', 345300.0]
+    >>> t = time_benchmark(lambda: 0, Number=1, Repeat=1)
+    >>> pp(t)
+    Time data are printed in seconds.
+    {'max': ...,
+     'mean': ...,
+     'min': ...,
+     'min_relative': ...,
+     'raw_times': [...],
+     'raw_times_relative': [...]}
+    >>> m = memory_usage_benchmark(lambda: 0)
+    >>> pp(m)
+    Memory data are printed in MB.
+    {'max': ...,
+     'max_relative': ...,
+     'max_result_per_run': [...],
+     'max_result_per_run_relative': [...],
+     'mean': ...,
+     'mean_result_per_run': [...],
+     'raw_results': [[..., ..., ...]],
+     'relative_results': [[..., ..., ...]]}
     """
     for arg in args:
+        is_benchmark = _check_if_benchmarks(arg)
+        if is_benchmark == "time benchmark":
+            print("Time data are printed in seconds.")
+        elif is_benchmark == "memory benchmark":
+            print("Memory data are printed in MB.")
         pprint(
             rounder.signif_object(
                 arg, digits=config.digits_for_printing, use_copy=True
             )
         )
+
+
+def _check_if_benchmarks(obj):
+    """Check if obj comes from time or memory benchmarks.
+    
+    >>> _check_if_benchmarks(10)
+    >>> _check_if_benchmarks("10")
+    >>> _check_if_benchmarks([10, ])
+    >>> _check_if_benchmarks((10, ))
+    >>> _check_if_benchmarks({10, 20})
+    >>> _check_if_benchmarks(dict(x=10, y=20))
+    >>> t = time_benchmark(lambda: 0, Number=1, Repeat=1)
+    >>> m = memory_usage_benchmark(lambda: 0)
+    >>> _check_if_benchmarks(t)
+    'time benchmark'
+    >>> _check_if_benchmarks(m)
+    'memory benchmark'
+    """
+    time_keys = {
+        "min",
+        "min_relative",
+        "raw_times",
+        "raw_times_relative",
+        "mean",
+        "max",
+    }
+    memory_keys = {
+        "raw_results",
+        "relative_results",
+        "mean_result_per_run",
+        "max_result_per_run",
+        "max_result_per_run_relative",
+        "mean",
+        "max",
+        "max_relative",
+    }
+    try:
+        if obj.keys() == time_keys:
+            return "time benchmark"
+    except AttributeError:
+        pass
+    try:
+        if obj.keys() == memory_keys:
+            return "memory benchmark"
+    except AttributeError:
+        return None
 
 
 def _add_func_to_config(func):
@@ -914,10 +985,10 @@ def MEMPOINT(ID=None):
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        MEMLOGS.append(
-            MemLog(  # type: ignore
-                ID, (asizeof(all=True) - asizeof(MEMLOGS))
-            )  # type: ignore
+        MEMLOGS.append( # type: ignore
+            MemLog(     
+                ID, (asizeof(all=True) - asizeof(MEMLOGS)) # type: ignore
+            )
         )
 
 
