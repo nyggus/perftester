@@ -48,7 +48,7 @@ from easycheck import (
     check_if_not,
     check_type,
     check_if_paths_exist,
-    assert_instance, # required for doctests
+    assert_instance,  # required for doctests
 )
 from functools import wraps
 from memory_profiler import memory_usage
@@ -297,7 +297,9 @@ class Config:
             memory_usage((self.benchmark_function, (), {}))
             for _ in range(self.defaults["memory"]["repeat"])
         ]
-        self.memory_benchmark = MiB_TO_MB_FACTOR * min(max(r) for r in memory_results)
+        self.memory_benchmark = MiB_TO_MB_FACTOR * min(
+            max(r) for r in memory_results
+        )
 
     def set_defaults(
         self, which, number=None, repeat=None, Number=None, Repeat=None
@@ -617,7 +619,7 @@ def memory_usage_test(
     When you use Repeat, it has a higher priority than the corresponding
     setting from config.settings, and it will be used. This is used in this
     single call only, and so it does not overwrite the config settings.
-    
+
     WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
     perftester provides data in MB.
 
@@ -714,7 +716,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     single call only, and so it does not overwrite the config settings.
 
     The function returns a dict that you can pretty-print using function pp().
-    
+
     WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
     perftester provides data in MB.
 
@@ -739,10 +741,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     n = Repeat or config.settings[func]["memory"]["repeat"]
 
     try:
-        memory_results = [
-            memory_usage((func, args, kwargs))
-            for i in range(n)
-        ]
+        memory_results = [memory_usage((func, args, kwargs)) for i in range(n)]
     except Exception as e:
         raise FunctionError(
             f"The tested function raised {type(e).__name__}: {str(e)}"
@@ -752,10 +751,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
         for j, _ in enumerate(result):
             memory_results[i][j] *= MiB_TO_MB_FACTOR
 
-    memory_results_mean = [
-        mean(this_result)
-        for this_result in memory_results
-    ]
+    memory_results_mean = [mean(this_result) for this_result in memory_results]
     memory_results_max = [max(this_result) for this_result in memory_results]
     overall_mean = mean(memory_results_mean)
     # We take the min of the max values
@@ -765,7 +761,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     for i, result in enumerate(relative_results):
         for j, r in enumerate(result):
             relative_results[i][j] = r / config.memory_benchmark
-            
+
     return {
         "raw_results": memory_results,
         "relative_results": relative_results,
@@ -897,7 +893,7 @@ def pp(*args):
 
 def _check_if_benchmarks(obj):
     """Check if obj comes from time or memory benchmarks.
-    
+
     >>> _check_if_benchmarks(10)
     >>> _check_if_benchmarks("10")
     >>> _check_if_benchmarks([10, ])
@@ -955,10 +951,78 @@ def _add_func_to_config(func):
 
 # Full memory measurement
 
-builtins.__dict__["MEMLOGS"] = []
+from collections import UserList
+import inspect
+import warnings
 
+class IncorrectUseOfMEMLOGSError(Exception):
+    ...
 
 MemLog = namedtuple("MemLog", "ID memory")
+
+
+class MemLogsList(UserList):
+    """A container for keeping memory logs.
+    
+    It's designed as a singleton class in a way that
+    only a MEMPOINT() function can change it.
+    """
+    _instance = None
+
+    def __new__(cls, data, *args, **kwargs):
+        """Singleton class."""
+        if not cls._instance:
+            cls._instance = super().__new__(cls, *args, **kwargs)
+        return cls._instance
+
+    def __init__(self, data):
+        super().__init__(data)
+        self.provided_IDs = []
+        
+    @property
+    def IDs(self):
+        return [ID for ID, _ in self.data]
+
+    @property
+    def memories(self):
+        return [memory for _, memory in self.data]
+
+    def filter(self, predicate):
+        return MemLogsList(
+            [memlog for memlog in self.data if predicate(memlog)]
+        )
+    
+    def append(self, memlog):
+        if inspect.stack()[1][3] == "MEMPOINT":
+            if memlog.ID in self.provided_IDs:
+                ID_new = f"{memlog.ID}-{self.provided_IDs.count(memlog.ID) + 1}"
+            else:
+                ID_new = memlog.ID
+            self.provided_IDs.append(memlog.ID)
+            super().append(MemLog(ID_new, memlog.memory))
+        else:
+            raise IncorrectUseOfMEMLOGSError(
+                "MEMLOGS can be updated only using the MEMPOINT() function"
+            )
+    
+    def __setitem__(self, *args, **kwargs):
+        raise IncorrectUseOfMEMLOGSError(
+            "MEMLOGS does not accept item assignment"
+        )
+    
+    def __add__(self, *args, **kwargs):
+        raise IncorrectUseOfMEMLOGSError(
+            "MEMLOGS can be updated only using the MEMPOINT() function"
+        )
+    
+    __radd__ = __add__
+    __iadd__ = __add__
+    __mul__ = __add__
+    __imul__ = __add__
+    __rmul__ = __add__
+
+
+builtins.__dict__["MEMLOGS"] = MemLogsList([])
 
 
 def MEMPRINT():
@@ -985,9 +1049,16 @@ def MEMPOINT(ID=None):
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        MEMLOGS.append( # type: ignore
-            MemLog(     
-                ID, (asizeof(all=True) - asizeof(MEMLOGS)) # type: ignore
+        # provided_IDs = MEMLOGS.provided_IDs  # type: ignore
+        # if ID in provided_IDs:
+        #     ID_new = f"{ID}-{provided_IDs.count(ID) + 1}"
+        # else:
+        #     ID_new = ID
+
+        # MEMLOGS.provided_IDs.append(ID) # type: ignore
+        MEMLOGS.append(  # type: ignore
+            MemLog(
+                str(ID), (asizeof(all=True) - asizeof(MEMLOGS))  # type: ignore
             )
         )
 
