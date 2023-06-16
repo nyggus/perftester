@@ -1,6 +1,6 @@
 # RAM memory tracker
 
-`perftester` enables you to check the full memory used the session, which includes the memory taken by all the objects minus the memory that `perftester`'s memory log takes. 
+`perftester` enables you to check the full memory used the session, which includes the memory taken by all the objects minus the memory that `perftester`'s memory log takes.
 
 Since this is a profiling tool, the `perftester` code is not used by the application. Hence, to make using the tool easier, it's objects are available as global variables — hence you do not have to import that in every module in which you're using the tools. So, to use this functionality, it's enough to import `perftester` in any of the modules of your application; after this import, you can use its memory-tracking tools in any module of your application.
 
@@ -118,7 +118,6 @@ True
 
 ```
 
-
 ## Additional `MEMLOGS` tools
 
 You can use several additional methods and properties for the `MEMLOGS` object:
@@ -164,7 +163,11 @@ We can of course use a `lambda` function instead:
  MemLog(ID='After create_huge_list()', memory=...)]
 >>> MEMLOGS.filter(lambda m: m.memory < 1_000_000)
 []
->>> MEMLOGS.filter(lambda m: "after" in m.ID or "before" in m.ID)
+>>> MEMLOGS.filter(lambda m: "after" in m.ID.lower() or "before" in m.ID.lower())
+[MemLog(ID='After adding a list with 10 mln elements', memory=...),
+ MemLog(ID='After removing this list', memory=...),
+ MemLog(ID='Before create_huge_list()', memory=...),
+ MemLog(ID='After create_huge_list()', memory=...)]
 
 ```
 
