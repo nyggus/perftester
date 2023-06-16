@@ -879,6 +879,9 @@ def pp(*args):
      'relative_results': [[..., ..., ...]]}
     """
     for arg in args:
+        if arg is MEMLOGS:
+            pprint(arg)
+            continue
         is_benchmark = _check_if_benchmarks(arg)
         if is_benchmark == "time benchmark":
             print("Time data are printed in seconds.")
@@ -961,7 +964,7 @@ class IncorrectUseOfMEMLOGSError(Exception):
 MemLog = namedtuple("MemLog", "ID memory")
 
 
-class MemLogsList(UserList):
+class MemLogsList:
     """A container for keeping memory logs.
     
     It's designed as a singleton class in a way that
@@ -976,7 +979,7 @@ class MemLogsList(UserList):
         return cls._instance
 
     def __init__(self, data):
-        super().__init__(data)
+        self.data = data
         self.provided_IDs = []
         
     @property
@@ -988,9 +991,11 @@ class MemLogsList(UserList):
         return [memory for _, memory in self.data]
 
     def filter(self, predicate):
-        return MemLogsList(
-            [memlog for memlog in self.data if predicate(memlog)]
-        )
+        """Get a list of MemLog elements satisfying the condition from predicate."""
+        return [memlog for memlog in self.data if predicate(memlog)]
+    
+    def map(self, func):
+        return [func(memlog) for memlog in self.data]
     
     def append(self, memlog):
         if inspect.stack()[1][3] == "MEMPOINT":
@@ -999,7 +1004,7 @@ class MemLogsList(UserList):
             else:
                 ID_new = memlog.ID
             self.provided_IDs.append(memlog.ID)
-            super().append(MemLog(ID_new, memlog.memory))
+            self.data.append(MemLog(ID_new, memlog.memory))
         else:
             raise IncorrectUseOfMEMLOGSError(
                 "MEMLOGS can be updated only using the MEMPOINT() function"
@@ -1010,16 +1015,26 @@ class MemLogsList(UserList):
             "MEMLOGS does not accept item assignment"
         )
     
-    def __add__(self, *args, **kwargs):
-        raise IncorrectUseOfMEMLOGSError(
-            "MEMLOGS can be updated only using the MEMPOINT() function"
-        )
+    def __repr__(self):
+        return repr(self.data)
     
-    __radd__ = __add__
-    __iadd__ = __add__
-    __mul__ = __add__
-    __imul__ = __add__
-    __rmul__ = __add__
+    def __getitem__(self, i):
+        """Get item(s) of MEMLOGS.add()
+        
+        Warning: When i is a slice, a list is returned, not an instance of
+        MemLogsList.
+        """
+        if isinstance(i, slice):
+            return [MemLog(*it) for it in self.data[i]]
+        else:
+            return MemLog(*self.data[i])
+    
+    def __len__(self):
+        return len(self.data)
+    
+    def __iter__(self):
+        for ID, memory in self.data:
+            yield MemLog(ID, memory)
 
 
 builtins.__dict__["MEMLOGS"] = MemLogsList([])
@@ -1049,13 +1064,6 @@ def MEMPOINT(ID=None):
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        # provided_IDs = MEMLOGS.provided_IDs  # type: ignore
-        # if ID in provided_IDs:
-        #     ID_new = f"{ID}-{provided_IDs.count(ID) + 1}"
-        # else:
-        #     ID_new = ID
-
-        # MEMLOGS.provided_IDs.append(ID) # type: ignore
         MEMLOGS.append(  # type: ignore
             MemLog(
                 str(ID), (asizeof(all=True) - asizeof(MEMLOGS))  # type: ignore
