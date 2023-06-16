@@ -39,5 +39,7 @@ echo -- tests/doctest_test_sum.md
 python -m doctest doctest_test_sum.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
 echo -- doctest_cache.md
 python -m doctest doctest_cache.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
+echo -- doctest_memory_tracker.md
+python -m doctest doctest_memory_tracker.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
 
 cd ..
