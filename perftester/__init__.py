@@ -7,6 +7,7 @@ from .perftester import (
     LogFilePathError,
     Config,
     MemLog,
+    MemLogsList,
     config,
     memory_usage_benchmark,
     memory_usage_test,
