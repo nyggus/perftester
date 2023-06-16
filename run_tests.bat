@@ -25,6 +25,8 @@ echo -- docs/use_case_raw_time_testing.md
 python -m doctest use_case_raw_time_testing.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
 echo -- change_benchmarking_function.md
 python -m doctest change_benchmarking_function.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
+echo -- use_of_memory_tracker.md
+python -m doctest use_of_memory_tracker.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
 
 cd ../tests
 echo --- Unit test files - in the the tests/ folder ---
@@ -38,7 +40,5 @@ echo -- tests/doctest_test_sum.md
 python -m doctest doctest_test_sum.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
 echo -- doctest_cache.md
 python -m doctest doctest_cache.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
-echo -- doctest_memory_tracker.md
-python -m doctest doctest_memory_tracker.md -o IGNORE_EXCEPTION_DETAIL -o NORMALIZE_WHITESPACE -o ELLIPSIS
 
 cd ..
