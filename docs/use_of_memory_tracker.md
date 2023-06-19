@@ -177,5 +177,10 @@ And here's the `.map()` method in action. Like the `.filter()` method, it return
 >>> as_MB = MEMLOGS.map(lambda m: m.memory / 1024 / 1024)
 >>> all(m < 500 for m in as_MB)
 True
+>>> MEMLOGS.map(lambda m: m.ID.lower())
+['perftester import', 'none', 'the second mempoint', 'none-2', 'after adding a list with 10 mln elements', 'after removing this list', 'just checking', 'before create_huge_list()', 'after create_huge_list()', 'none-3']
+>>> memlogs = MEMLOGS.map(lambda m: (m.ID.lower(), round(m.memory / 1024 / 1024)))
+>>> memlogs[:2]
+[('perftester import', ...), ('none', ...)]
 
 ```
