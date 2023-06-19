@@ -415,7 +415,7 @@ Currently, `perftester` contains a beta version (under heavy testing) of a new f
 
 > Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept.
 
-The feature works in the following way. When you import `perftester` — but you need to do it with `import perftester`, not via importing particular objects — you will be able to see new objects in the global space. One of the is `MEMLOGS`:
+The feature works in the following way. When you import `perftester` or an object from it (e.g., `from perftester import time_test)`, you will be able to see new objects in the global space. One of the is `MEMLOGS`:
 
 ```python-repl
 >>> import perftester
