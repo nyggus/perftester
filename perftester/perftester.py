@@ -34,6 +34,7 @@ Let's return to previous settings:
 """
 import builtins
 import copy
+import inspect
 import os
 import rounder
 import sys
@@ -59,6 +60,10 @@ from statistics import mean
 
 
 MiB_TO_MB_FACTOR = 1.048576
+
+
+class IncorrectUseOfMEMLOGSError(Exception):
+    """MEMLOGS was used incorrectly."""
 
 
 class CLIPathError(Exception):
@@ -954,22 +959,17 @@ def _add_func_to_config(func):
 
 # Full memory measurement
 
-from collections import UserList
-import inspect
-import warnings
-
-class IncorrectUseOfMEMLOGSError(Exception):
-    ...
 
 MemLog = namedtuple("MemLog", "ID memory")
 
 
 class MemLogsList:
     """A container for keeping memory logs.
-    
+
     It's designed as a singleton class in a way that
     only a MEMPOINT() function can change it.
     """
+
     _instance = None
 
     def __new__(cls, data, *args, **kwargs):
@@ -981,7 +981,7 @@ class MemLogsList:
     def __init__(self, data):
         self.data = data
         self.provided_IDs = []
-        
+
     @property
     def IDs(self):
         return [ID for ID, _ in self.data]
@@ -993,14 +993,16 @@ class MemLogsList:
     def filter(self, predicate):
         """Get a list of MemLog elements satisfying the condition from predicate."""
         return [memlog for memlog in self.data if predicate(memlog)]
-    
+
     def map(self, func):
         return [func(memlog) for memlog in self.data]
-    
+
     def append(self, memlog):
         if inspect.stack()[1][3] == "MEMPOINT":
             if memlog.ID in self.provided_IDs:
-                ID_new = f"{memlog.ID}-{self.provided_IDs.count(memlog.ID) + 1}"
+                ID_new = (
+                    f"{memlog.ID}-{self.provided_IDs.count(memlog.ID) + 1}"
+                )
             else:
                 ID_new = memlog.ID
             self.provided_IDs.append(memlog.ID)
@@ -1009,18 +1011,18 @@ class MemLogsList:
             raise IncorrectUseOfMEMLOGSError(
                 "MEMLOGS can be updated only using the MEMPOINT() function"
             )
-    
+
     def __setitem__(self, *args, **kwargs):
         raise IncorrectUseOfMEMLOGSError(
             "MEMLOGS does not accept item assignment"
         )
-    
+
     def __repr__(self):
         return repr(self.data)
-    
+
     def __getitem__(self, i):
         """Get item(s) of MEMLOGS.add()
-        
+
         Warning: When i is a slice, a list is returned, not an instance of
         MemLogsList.
         """
@@ -1028,10 +1030,10 @@ class MemLogsList:
             return [MemLog(*it) for it in self.data[i]]
         else:
             return MemLog(*self.data[i])
-    
+
     def __len__(self):
         return len(self.data)
-    
+
     def __iter__(self):
         for ID, memory in self.data:
             yield MemLog(ID, memory)
@@ -1089,6 +1091,7 @@ def MEMTRACE(func, ID_before=None, ID_after=None):
 builtins.__dict__["MEMPOINT"] = MEMPOINT
 builtins.__dict__["MEMPRINT"] = MEMPRINT
 builtins.__dict__["MEMTRACE"] = MEMTRACE
+
 
 MEMPOINT("perftester import")
 
