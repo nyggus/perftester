@@ -1063,17 +1063,6 @@ class MemLogsList:
 builtins.__dict__["MEMLOGS"] = MemLogsList([])
 
 
-def MEMPRINT():
-    """Pretty-print MEMLOGS."""
-    for i, memlog in enumerate(MEMLOGS):  # type: ignore
-        ID = memlog.ID if memlog.ID else ""
-        print(
-            f"{i: < 4} "
-            f"{round(memlog.memory / 1024/1024, 1): <6} → "
-            f"{ID}"
-        )
-
-
 def MEMPOINT(ID=None):
     """Global function to measure full memory and log it into MEMLOGS.
 
@@ -1101,6 +1090,14 @@ def MEMORY():
     the memory in bytes, calculated using pympler.asizeof.asizeof(). So,
     the function measures the size of all current gc objects, including
     module, global and stack frame objects, minus the size of `MEMLOGS`.
+    
+    >>> len(MEMLOGS)
+    1
+    >>> mem = MEMORY()
+    >>> type(mem)
+    <class 'int'>
+    >>> len(MEMLOGS)
+    1
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -1120,6 +1117,29 @@ def MEMTRACE(func, ID_before=None, ID_after=None):
         return f
 
     return inner
+
+
+def MEMPRINT():
+    """Pretty-print MEMLOGS.
+    
+    >>> MEMPOINT()
+    >>> MEMPOINT("Testing point")
+    >>> MEMPOINT()
+    >>> MEMPOINT("Testing point")
+    >>> MEMPRINT()
+    0   3.0    → perftester import
+    1   3.3    → None
+    2   3.3    → Testing point
+    3   3.3    → None-2
+    4   3.3    → Testing point-2
+    """
+    for i, memlog in enumerate(MEMLOGS):  # type: ignore
+        ID = memlog.ID if memlog.ID else ""
+        print(
+            f"{i: < 4} "
+            f"{round(memlog.memory / 1024/1024, 1): <6} → "
+            f"{ID}"
+        )
 
 
 builtins.__dict__["MEMPOINT"] = MEMPOINT
