@@ -966,8 +966,29 @@ MemLog = namedtuple("MemLog", "ID memory")
 class MemLogsList:
     """A container for keeping memory logs.
 
-    It's designed as a singleton class in a way that
-    only a MEMPOINT() function can change it.
+    It's designed as a singleton class in a way that only a MEMPOINT()
+    function can change it.
+    
+    >>> MEMLOGS[0].ID
+    'perftester import'
+    >>> MEMLOGS[0] = "Wrong!"
+    Traceback (most recent call last):
+        ...
+    IncorrectUseOfMEMLOGSError: MEMLOGS does not accept item assignment
+    >>> MEMLOGS[0:5]
+    [MemLog(ID='perftester import', memory=...)]
+    >>> MEMLOGS[4:5]
+    []
+    >>> MEMLOGS.append("Wrong!")
+    Traceback (most recent call last):
+        ...
+    IncorrectUseOfMEMLOGSError: MEMLOGS can be updated only using the MEMPOINT() function
+    
+    >>> len(MEMLOGS)
+    1
+    >>> for _ in range(10): MEMPOINT()
+    >>> len(MEMLOGS)
+    11    
     """
 
     _instance = None
@@ -1068,9 +1089,22 @@ def MEMPOINT(ID=None):
         warnings.simplefilter("ignore")
         MEMLOGS.append(  # type: ignore
             MemLog(
-                str(ID), (asizeof(all=True) - asizeof(MEMLOGS))  # type: ignore
+                str(ID), (asizeof(all=True) - asizeof(MEMLOGS)) # type: ignore
             )
         )
+
+
+def MEMORY():
+    """Global function to measure full memory.
+
+    The function is available from any module of a session. It returns
+    the memory in bytes, calculated using pympler.asizeof.asizeof(). So,
+    the function measures the size of all current gc objects, including
+    module, global and stack frame objects, minus the size of `MEMLOGS`.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return asizeof(all=True) - asizeof(MEMLOGS) # type: ignore
 
 
 def MEMTRACE(func, ID_before=None, ID_after=None):
@@ -1089,6 +1123,7 @@ def MEMTRACE(func, ID_before=None, ID_after=None):
 
 
 builtins.__dict__["MEMPOINT"] = MEMPOINT
+builtins.__dict__["MEMORY"] = MEMORY
 builtins.__dict__["MEMPRINT"] = MEMPRINT
 builtins.__dict__["MEMTRACE"] = MEMTRACE
 
