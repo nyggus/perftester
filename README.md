@@ -413,7 +413,7 @@ You can of course combine both types of tests, and you can do it in a very simpl
 
 Currently, `perftester` contains a beta version (under heavy testing) of a new feature that can be used to trace full memory usage of a Python program.
 
->  Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept.
+> Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept.
 
 The feature works in the following way. When you import `perftester` — but you need to do it with `import perftester`, not via importing particular objects — you will be able to see new objects in the global space. One of the is `MEMLOGS`:
 
@@ -427,6 +427,10 @@ The feature works in the following way. When you import `perftester` — but you
 It's an empty list for the moment. When you start tracing memory using `perftester`, this list will collect the subsequent measurements. You can measure them in two ways. One is via a `MEMPOINT()` function, and another via a  `MEMTRACE` decorator. They, too, are in the global scope, so you can use them in any module inside a session in which `perftester` was already imported.
 
 The  `MEMLOGS` list will contain elements being instances of `MemLog`, which is a `functools.namedtuple `data type, with two attributes:`"ID"`and `"memory"`. This data type is imported with `perftester`, so if you want to use it, you can reach it as `perftester.MemLog`. You don't have to use it, though. Since it's a named tuple, you can treat it as a regular tuple.
+
+#### Measure the memory
+
+The simplest way to calculate the current memory usage by the session is to use the `MEMORY()` function. It takes no argument and just returns the memory usage in bytes, but unlike the `MEMPOINT()` function, it does not log it. So, its usage is mainly during an interactive session, when you have just thought, "Okay, let's see the memory now." It's simpler than using `MEMPOINT()` with `MEMLOGS`, but as just described, it's has a very limited functionality.
 
 #### What sort of memory is measured?
 
