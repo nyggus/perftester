@@ -98,6 +98,7 @@ or you can use a dedicated function `MEMPRINT()`, which converts memories to MB:
 
 ```
 
+
 ## Using the `MEMTRACE` decorator
 
 If you're interested in tracing the full-memory usage for a particular function, to see the full-memory usage of the session right before calling the function and right after it has returned, you can use the `MEMTRACE` decorator. Just like the other full-memory-tracing tools, you do not need to import it, either.
@@ -173,6 +174,7 @@ We can of course use a `lambda` function instead:
 
 And here's the `.map()` method in action. Like the `.filter()` method, it returns a list:
 
+
 ```python-repl
 >>> as_MB = MEMLOGS.map(lambda m: m.memory / 1024 / 1024)
 >>> all(m < 500 for m in as_MB)
@@ -182,5 +184,34 @@ True
 >>> memlogs = MEMLOGS.map(lambda m: (m.ID.lower(), round(m.memory / 1024 / 1024)))
 >>> memlogs[:2]
 [('perftester import', ...), ('none', ...)]
+
+```
+
+
+## Using `MEMORY()`
+
+Above, we've seen the most common use of `perftester`'s full-memory tracer. There's one additional function, `MEMORY()`, with very simple functionality: it returns the current full memory of the sessions (minus the size of `MEMLOGS`):
+
+```python-repl
+>>> mem = MEMORY()
+>>> type(mem)
+<class 'int'>
+
+```
+
+The function only returns the memory, without logging it:
+
+```python-repl
+>>> len(MEMLOGS)
+10
+>>> _ = MEMORY()
+>>> len(MEMLOGS)
+10
+>>> MEMPOINT("Just once more")
+>>> len(MEMLOGS)
+11
+>>> _ = MEMORY()
+>>> len(MEMLOGS)
+11
 
 ```
