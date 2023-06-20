@@ -17,6 +17,8 @@ memory_profiler.memory_usage() and pympler.asizeof.asizeof() are provided in
 the same units. If you want to recalculate the data to MiB, you can divide the
 memory by perftester.MiB_TO_MB_FACTOR.
 
+WARNING: Calculating memory can take quite some time when the 
+
 For the sake of pretty-printing the benchmarks, perftester comes with a pp
 function, which rounds all numbers to four significant digits and prints
 the object using pprint.pprint:
@@ -885,7 +887,7 @@ def pp(*args):
     """
     for arg in args:
         if arg is MEMLOGS:
-            pprint(arg)
+            MEMPRINT()
             continue
         is_benchmark = _check_if_benchmarks(arg)
         if is_benchmark == "time benchmark":
@@ -988,7 +990,11 @@ class MemLogsList:
     1
     >>> for _ in range(10): MEMPOINT()
     >>> len(MEMLOGS)
-    11    
+    11
+    >>> del MEMLOGS
+    Traceback (most recent call last):
+        ...
+    NameError: name 'MEMLOGS' is not defined
     """
 
     _instance = None
@@ -1120,7 +1126,7 @@ def MEMTRACE(func, ID_before=None, ID_after=None):
 
 
 def MEMPRINT():
-    """Pretty-print MEMLOGS.
+    """Pretty-print MEMLOGS in MB.
     
     >>> MEMPOINT()
     >>> MEMPOINT("Testing point")
@@ -1137,7 +1143,7 @@ def MEMPRINT():
         ID = memlog.ID if memlog.ID else ""
         print(
             f"{i: < 4} "
-            f"{round(memlog.memory / 1024/1024, 1): <6} → "
+            f"{str(round(memlog.memory / 1024/1024, 2)) + ' MB': <11} → "
             f"{ID}"
         )
 
