@@ -34,6 +34,12 @@ You can change this behavior, however:
 Let's return to previous settings:
 >>> pt.config.digits_for_printing = 4
 """
+import warnings
+from pympler.asizeof import asizeof
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    STARTING_MEMORY = asizeof(all=True)
+
 import builtins
 import copy
 import inspect
@@ -41,7 +47,6 @@ import os
 import rounder
 import sys
 import timeit
-import warnings
 
 from collections import namedtuple
 from collections.abc import Callable
@@ -57,7 +62,6 @@ from functools import wraps
 from memory_profiler import memory_usage
 from pathlib import Path
 from pprint import pprint
-from pympler.asizeof import asizeof
 from statistics import mean
 
 
@@ -1083,7 +1087,7 @@ def MEMPOINT(ID=None):
         warnings.simplefilter("ignore")
         MEMLOGS.append(  # type: ignore
             MemLog(
-                str(ID), (asizeof(all=True) - asizeof(MEMLOGS)) # type: ignore
+                str(ID), (asizeof(all=True) - LOADING_MEMORY) # type: ignore
             )
         )
 
@@ -1106,7 +1110,7 @@ def MEMORY():
     """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        return asizeof(all=True) - asizeof(MEMLOGS) # type: ignore
+        return asizeof(all=True) - LOADING_MEMORY # type: ignore
 
 
 def MEMTRACE(func, ID_before=None, ID_after=None):
@@ -1151,6 +1155,11 @@ builtins.__dict__["MEMPOINT"] = MEMPOINT
 builtins.__dict__["MEMORY"] = MEMORY
 builtins.__dict__["MEMPRINT"] = MEMPRINT
 builtins.__dict__["MEMTRACE"] = MEMTRACE
+
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    LOADING_MEMORY = asizeof(all=True) - STARTING_MEMORY
 
 
 MEMPOINT("perftester import")
