@@ -977,7 +977,7 @@ class MemLogsList:
     Traceback (most recent call last):
         ...
     IncorrectUseOfMEMLOGSError: MEMLOGS does not accept item assignment
-    >>> MEMLOGS[0:5]
+    >>> MEMLOGS[0]
     [MemLog(ID='perftester import', memory=...)]
     >>> MEMLOGS[4:5]
     []
@@ -986,11 +986,10 @@ class MemLogsList:
         ...
     IncorrectUseOfMEMLOGSError: MEMLOGS can be updated only using the MEMPOINT() function
     
-    >>> len(MEMLOGS)
-    1
+    >>> current_len = len(MEMLOGS)
     >>> for _ in range(10): MEMPOINT()
-    >>> len(MEMLOGS)
-    11
+    >>> len(MEMLOGS) - current_len
+    10
     >>> del MEMLOGS
     Traceback (most recent call last):
         ...
@@ -1133,11 +1132,11 @@ def MEMPRINT():
     >>> MEMPOINT()
     >>> MEMPOINT("Testing point")
     >>> MEMPRINT()
-    0   3.0    → perftester import
-    1   3.3    → None
-    2   3.3    → Testing point
-    3   3.3    → None-2
-    4   3.3    → Testing point-2
+    0   9.52 MB     → perftester import
+    1   9.8 MB      → None
+    2   9.8 MB      → Testing point
+    3   9.8 MB      → None-2
+    4   9.8 MB      → Testing point-2
     """
     for i, memlog in enumerate(MEMLOGS):  # type: ignore
         ID = memlog.ID if memlog.ID else ""
