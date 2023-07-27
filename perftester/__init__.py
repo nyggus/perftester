@@ -6,8 +6,6 @@ from .perftester import (
     CLIPathError,
     LogFilePathError,
     Config,
-    MemLog,
-    MemLogsList,
     config,
     memory_usage_benchmark,
     memory_usage_test,

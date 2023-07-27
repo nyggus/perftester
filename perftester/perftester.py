@@ -43,6 +43,7 @@ with warnings.catch_warnings():
 import builtins
 import copy
 import inspect
+import gc
 import os
 import rounder
 import sys
@@ -699,15 +700,15 @@ def memory_usage_test(
             ),
         )
     if relative_limit is not None:
-        relatve_got_memory = results["max"] / config.memory_benchmark
+        relative_got_memory = results["max"] / config.memory_benchmark
         check_if(
-            relatve_got_memory <= relative_limit,
+            relative_got_memory <= relative_limit,
             handle_with=MemoryTestError,
             message=(
                 f"Memory test not passed for function {func.__name__}:\n"
                 f"relative memory limit = {relative_limit}\n"
                 f"maximum obtained relative memory usage = "
-                f"{rounder.signif(relatve_got_memory, config.digits_for_printing)}"
+                f"{rounder.signif(relative_got_memory, config.digits_for_printing)}"
             ),
         )
     config.full_traceback()
@@ -961,208 +962,6 @@ def _add_func_to_config(func):
         config.settings[func]["memory"] = dict(
             repeat=config.defaults["memory"]["repeat"],
         )
-
-
-# Full memory measurement
-
-
-MemLog = namedtuple("MemLog", "ID memory")
-
-
-class MemLogsList:
-    """A container for keeping memory logs.
-
-    It's designed as a singleton class in a way that only a MEMPOINT()
-    function can change it.
-    
-    >>> MEMLOGS[0].ID
-    'perftester import'
-    >>> MEMLOGS[0] = "Wrong!"
-    Traceback (most recent call last):
-        ...
-    IncorrectUseOfMEMLOGSError: MEMLOGS does not accept item assignment
-    >>> MEMLOGS[0]
-    [MemLog(ID='perftester import', memory=...)]
-    >>> MEMLOGS[4:5]
-    []
-    >>> MEMLOGS.append("Wrong!")
-    Traceback (most recent call last):
-        ...
-    IncorrectUseOfMEMLOGSError: MEMLOGS can be updated only using the MEMPOINT() function
-    
-    >>> current_len = len(MEMLOGS)
-    >>> for _ in range(10): MEMPOINT()
-    >>> len(MEMLOGS) - current_len
-    10
-    >>> del MEMLOGS
-    Traceback (most recent call last):
-        ...
-    NameError: name 'MEMLOGS' is not defined
-    """
-
-    _instance = None
-
-    def __new__(cls, data, *args, **kwargs):
-        """Singleton class."""
-        if not cls._instance:
-            cls._instance = super().__new__(cls, *args, **kwargs)
-        return cls._instance
-
-    def __init__(self, data):
-        self.data = data
-        self.provided_IDs = []
-
-    @property
-    def IDs(self):
-        return [ID for ID, _ in self.data]
-
-    @property
-    def memories(self):
-        return [memory for _, memory in self.data]
-
-    def filter(self, predicate):
-        """Get a list of MemLog elements satisfying the condition from predicate."""
-        return [memlog for memlog in self.data if predicate(memlog)]
-
-    def map(self, func):
-        return [func(memlog) for memlog in self.data]
-
-    def append(self, memlog):
-        if inspect.stack()[1][3] == "MEMPOINT":
-            if memlog.ID in self.provided_IDs:
-                ID_new = (
-                    f"{memlog.ID}-{self.provided_IDs.count(memlog.ID) + 1}"
-                )
-            else:
-                ID_new = memlog.ID
-            self.provided_IDs.append(memlog.ID)
-            self.data.append(MemLog(ID_new, memlog.memory))
-        else:
-            raise IncorrectUseOfMEMLOGSError(
-                "MEMLOGS can be updated only using the MEMPOINT() function"
-            )
-
-    def __setitem__(self, *args, **kwargs):
-        raise IncorrectUseOfMEMLOGSError(
-            "MEMLOGS does not accept item assignment"
-        )
-
-    def __repr__(self):
-        return repr(self.data)
-
-    def __getitem__(self, i):
-        """Get item(s) of MEMLOGS.add()
-
-        Warning: When i is a slice, a list is returned, not an instance of
-        MemLogsList.
-        """
-        if isinstance(i, slice):
-            return [MemLog(*it) for it in self.data[i]]
-        else:
-            return MemLog(*self.data[i])
-
-    def __len__(self):
-        return len(self.data)
-
-    def __iter__(self):
-        for ID, memory in self.data:
-            yield MemLog(ID, memory)
-
-
-builtins.__dict__["MEMLOGS"] = MemLogsList([])
-
-
-def MEMPOINT(ID=None):
-    """Global function to measure full memory and log it into MEMLOGS.
-
-    The function is available from any module of a session. It logs into
-    MEMLOGS, also available from any module.
-
-    Memory is collected using pympler.asizeof.asizeof(), and reported in
-    bytes. So, the function measures the size of all current gc objects,
-    including module, global and stack frame objects, minus the size
-    of `MEMLOGS`.
-    """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        MEMLOGS.append(  # type: ignore
-            MemLog(
-                str(ID), (asizeof(all=True) - LOADING_MEMORY) # type: ignore
-            )
-        )
-
-
-def MEMORY():
-    """Global function to measure full memory.
-
-    The function is available from any module of a session. It returns
-    the memory in bytes, calculated using pympler.asizeof.asizeof(). So,
-    the function measures the size of all current gc objects, including
-    module, global and stack frame objects, minus the size of `MEMLOGS`.
-    
-    >>> len(MEMLOGS)
-    1
-    >>> mem = MEMORY()
-    >>> type(mem)
-    <class 'int'>
-    >>> len(MEMLOGS)
-    1
-    """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        return asizeof(all=True) - LOADING_MEMORY # type: ignore
-
-
-def MEMTRACE(func, ID_before=None, ID_after=None):
-    """Decorator to log memory before and after running a function."""
-
-    @wraps(func)
-    def inner(*args, **kwargs):
-        before = ID_before if ID_before else f"Before {func.__name__}()"
-        MEMPOINT(before)
-        f = func(*args, **kwargs)
-        after = ID_after if ID_after else f"After {func.__name__}()"
-        MEMPOINT(after)
-        return f
-
-    return inner
-
-
-def MEMPRINT():
-    """Pretty-print MEMLOGS in MB.
-    
-    >>> MEMPOINT()
-    >>> MEMPOINT("Testing point")
-    >>> MEMPOINT()
-    >>> MEMPOINT("Testing point")
-    >>> MEMPRINT()
-    0   9.52 MB     → perftester import
-    1   9.8 MB      → None
-    2   9.8 MB      → Testing point
-    3   9.8 MB      → None-2
-    4   9.8 MB      → Testing point-2
-    """
-    for i, memlog in enumerate(MEMLOGS):  # type: ignore
-        ID = memlog.ID if memlog.ID else ""
-        print(
-            f"{i: < 4} "
-            f"{str(round(memlog.memory / 1024/1024, 2)) + ' MB': <11} → "
-            f"{ID}"
-        )
-
-
-builtins.__dict__["MEMPOINT"] = MEMPOINT
-builtins.__dict__["MEMORY"] = MEMORY
-builtins.__dict__["MEMPRINT"] = MEMPRINT
-builtins.__dict__["MEMTRACE"] = MEMTRACE
-
-
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    LOADING_MEMORY = asizeof(all=True) - STARTING_MEMORY
-
-
-MEMPOINT("perftester import")
 
 
 if __name__ == "__main__":
