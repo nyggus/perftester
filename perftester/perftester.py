@@ -891,9 +891,6 @@ def pp(*args):
      'relative_results': [[..., ..., ...]]}
     """
     for arg in args:
-        if arg is MEMLOGS:
-            MEMPRINT()
-            continue
         is_benchmark = _check_if_benchmarks(arg)
         if is_benchmark == "time benchmark":
             print("Time data are printed in seconds.")
