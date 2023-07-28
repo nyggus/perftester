@@ -427,7 +427,7 @@ The default behavior of `perftester` is to **not** include the full traceback wh
 
 ## Tracing full memory usage → Moved to `tracemem`
 
-In the `0.5.*` versions, `perftester` contained a beta version of a memory tracer that could be used to trace full memory usage of a Python session.
+Since the `0.5.*` versions, `perftester` contained a beta version of a memory tracer that could be used to trace full memory usage of a Python session.
 
 Since `perftester` requires some memory to load, it over-measured session memory. In order to avoid this, this feature was moved to a separate Python package, called `tracemem`. You can install it from [PyPi](https://pypi.org/project/tracemem/), and you will find its Git repository [here](https://github.com/nyggus/tracemem).
 
