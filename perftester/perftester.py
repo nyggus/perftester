@@ -17,6 +17,8 @@ memory_profiler.memory_usage() and pympler.asizeof.asizeof() are provided in
 the same units. If you want to recalculate the data to MiB, you can divide the
 memory by perftester.MiB_TO_MB_FACTOR.
 
+WARNING: Calculating memory can take quite some time when the 
+
 For the sake of pretty-printing the benchmarks, perftester comes with a pp
 function, which rounds all numbers to four significant digits and prints
 the object using pprint.pprint:
@@ -32,13 +34,20 @@ You can change this behavior, however:
 Let's return to previous settings:
 >>> pt.config.digits_for_printing = 4
 """
+import warnings
+from pympler.asizeof import asizeof
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    STARTING_MEMORY = asizeof(all=True)
+
 import builtins
 import copy
+import inspect
+import gc
 import os
 import rounder
 import sys
 import timeit
-import warnings
 
 from collections import namedtuple
 from collections.abc import Callable
@@ -48,17 +57,20 @@ from easycheck import (
     check_if_not,
     check_type,
     check_if_paths_exist,
-    assert_instance, # required for doctests
+    assert_instance,  # required for doctests
 )
 from functools import wraps
 from memory_profiler import memory_usage
 from pathlib import Path
 from pprint import pprint
-from pympler.asizeof import asizeof
 from statistics import mean
 
 
 MiB_TO_MB_FACTOR = 1.048576
+
+
+class IncorrectUseOfMEMLOGSError(Exception):
+    """MEMLOGS was used incorrectly."""
 
 
 class CLIPathError(Exception):
@@ -297,7 +309,9 @@ class Config:
             memory_usage((self.benchmark_function, (), {}))
             for _ in range(self.defaults["memory"]["repeat"])
         ]
-        self.memory_benchmark = MiB_TO_MB_FACTOR * min(max(r) for r in memory_results)
+        self.memory_benchmark = MiB_TO_MB_FACTOR * min(
+            max(r) for r in memory_results
+        )
 
     def set_defaults(
         self, which, number=None, repeat=None, Number=None, Repeat=None
@@ -617,7 +631,7 @@ def memory_usage_test(
     When you use Repeat, it has a higher priority than the corresponding
     setting from config.settings, and it will be used. This is used in this
     single call only, and so it does not overwrite the config settings.
-    
+
     WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
     perftester provides data in MB.
 
@@ -686,15 +700,15 @@ def memory_usage_test(
             ),
         )
     if relative_limit is not None:
-        relatve_got_memory = results["max"] / config.memory_benchmark
+        relative_got_memory = results["max"] / config.memory_benchmark
         check_if(
-            relatve_got_memory <= relative_limit,
+            relative_got_memory <= relative_limit,
             handle_with=MemoryTestError,
             message=(
                 f"Memory test not passed for function {func.__name__}:\n"
                 f"relative memory limit = {relative_limit}\n"
                 f"maximum obtained relative memory usage = "
-                f"{rounder.signif(relatve_got_memory, config.digits_for_printing)}"
+                f"{rounder.signif(relative_got_memory, config.digits_for_printing)}"
             ),
         )
     config.full_traceback()
@@ -714,7 +728,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     single call only, and so it does not overwrite the config settings.
 
     The function returns a dict that you can pretty-print using function pp().
-    
+
     WARNING: Unlike memory_profiler.memory_usage(), which reports memory in MiB,
     perftester provides data in MB.
 
@@ -739,10 +753,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     n = Repeat or config.settings[func]["memory"]["repeat"]
 
     try:
-        memory_results = [
-            memory_usage((func, args, kwargs))
-            for i in range(n)
-        ]
+        memory_results = [memory_usage((func, args, kwargs)) for i in range(n)]
     except Exception as e:
         raise FunctionError(
             f"The tested function raised {type(e).__name__}: {str(e)}"
@@ -752,10 +763,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
         for j, _ in enumerate(result):
             memory_results[i][j] *= MiB_TO_MB_FACTOR
 
-    memory_results_mean = [
-        mean(this_result)
-        for this_result in memory_results
-    ]
+    memory_results_mean = [mean(this_result) for this_result in memory_results]
     memory_results_max = [max(this_result) for this_result in memory_results]
     overall_mean = mean(memory_results_mean)
     # We take the min of the max values
@@ -765,7 +773,7 @@ def memory_usage_benchmark(func, *args, Repeat=None, **kwargs):
     for i, result in enumerate(relative_results):
         for j, r in enumerate(result):
             relative_results[i][j] = r / config.memory_benchmark
-            
+
     return {
         "raw_results": memory_results,
         "relative_results": relative_results,
@@ -897,7 +905,7 @@ def pp(*args):
 
 def _check_if_benchmarks(obj):
     """Check if obj comes from time or memory benchmarks.
-    
+
     >>> _check_if_benchmarks(10)
     >>> _check_if_benchmarks("10")
     >>> _check_if_benchmarks([10, ])
@@ -951,67 +959,6 @@ def _add_func_to_config(func):
         config.settings[func]["memory"] = dict(
             repeat=config.defaults["memory"]["repeat"],
         )
-
-
-# Full memory measurement
-
-builtins.__dict__["MEMLOGS"] = []
-
-
-MemLog = namedtuple("MemLog", "ID memory")
-
-
-def MEMPRINT():
-    """Pretty-print MEMLOGS."""
-    for i, memlog in enumerate(MEMLOGS):  # type: ignore
-        ID = memlog.ID if memlog.ID else ""
-        print(
-            f"{i: < 4} "
-            f"{round(memlog.memory / 1024/1024, 1): <6} → "
-            f"{ID}"
-        )
-
-
-def MEMPOINT(ID=None):
-    """Global function to measure full memory and log it into MEMLOGS.
-
-    The function is available from any module of a session. It logs into
-    MEMLOGS, also available from any module.
-
-    Memory is collected using pympler.asizeof.asizeof(), and reported in
-    bytes. So, the function measures the size of all current gc objects,
-    including module, global and stack frame objects, minus the size
-    of `MEMLOGS`.
-    """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        MEMLOGS.append( # type: ignore
-            MemLog(     
-                ID, (asizeof(all=True) - asizeof(MEMLOGS)) # type: ignore
-            )
-        )
-
-
-def MEMTRACE(func, ID_before=None, ID_after=None):
-    """Decorator to log memory before and after running a function."""
-
-    @wraps(func)
-    def inner(*args, **kwargs):
-        before = ID_before if ID_before else f"Before {func.__name__}()"
-        MEMPOINT(before)
-        f = func(*args, **kwargs)
-        after = ID_after if ID_after else f"After {func.__name__}()"
-        MEMPOINT(after)
-        return f
-
-    return inner
-
-
-builtins.__dict__["MEMPOINT"] = MEMPOINT
-builtins.__dict__["MEMPRINT"] = MEMPRINT
-builtins.__dict__["MEMTRACE"] = MEMTRACE
-
-MEMPOINT("perftester import")
 
 
 if __name__ == "__main__":

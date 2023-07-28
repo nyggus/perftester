@@ -409,100 +409,6 @@ You can of course combine both types of tests, and you can do it in a very simpl
 
 > Warning! Relative results can be different between operating systems.
 
-## Tracing full memory usage
-
-Currently, `perftester` contains a beta version (under heavy testing) of a new feature that can be used to trace full memory usage of a Python program.
-
->  Warning: Backward compatibility of this feature is not guaranteed! It does not affect the main functionality of `perftester`, however, so its backward compatibility should be kept.
-
-The feature works in the following way. When you import `perftester` — but you need to do it with `import perftester`, not via importing particular objects — you will be able to see new objects in the global space. One of the is `MEMLOGS`:
-
-```python-repl
->>> import perftester
->>> MEMLOGS[0].ID
-'perftester import'
-
-```
-
-It's an empty list for the moment. When you start tracing memory using `perftester`, this list will collect the subsequent measurements. You can measure them in two ways. One is via a `MEMPOINT()` function, and another via a  `MEMTRACE` decorator. They, too, are in the global scope, so you can use them in any module inside a session in which `perftester` was already imported.
-
-The  `MEMLOGS` list will contain elements being instances of `MemLog`, which is a `functools.namedtuple `data type, with two attributes:`"ID"`and `"memory"`. This data type is imported with `perftester`, so if you want to use it, you can reach it as `perftester.MemLog`. You don't have to use it, though. Since it's a named tuple, you can treat it as a regular tuple.
-
-#### What sort of memory is measured?
-
-The feature uses `pympler.asizeof.asizeof(all=True)` to measure the size of all current gc objects, including module, global and stack frame objects, minus the size of `MEMLOGS`. The memory is measured in MB.
-
-#### Using `MEMPOINT()`
-
-`MEMPOINT()` creates a point of full-memory measurement. It will be appended into `MEMLOGS`.
-
-```python-repl
-3>>> import perftester
->>> def foo(n):
-...     x = [i for i in range(n)]
-...     MEMPOINT()
-...     return x
->>> _ = foo(100)
->>> _ = foo(1_000_000)
->>> len(MEMLOGS)
-3
->>> MEMLOGS[2].memory > MEMLOGS[1].memory
-True
-
-```
-
-The last tests checks whether the second measurement — that is, from the function with `n` of a million — uses more memory that the function using `n` of a hundred. Makes sense, and indeed the test passes.
-
-When creating a point, you can use an ID, for instance, `MEMPOINT("from sth() function")`.
-
-`MEMPOINT()` can be used to create a point anywhere inside the code. Nevertheless, if you want to trace memory for a function, you can use a `MEMTRACE` decorator:
-
-```python-repl
->>> @MEMTRACE
-... def bar(n):
-...     return [i for i in range(n)]
->>> _ = bar(1_000_000)
->>> MEMLOGS[-2].memory < MEMLOGS[-1].memory
-True
-
-```
-
-The decorator creates two points: one right before running the test and another right after returning.
-
-The last line tests whether memory before running the function is smaller than that after running it — and given so big `n`, it should be.
-
-Look here:
-
-```python-repl
->>> @MEMTRACE
-... def bar(n):
-...     x = [i for i in range(n)]
-...     y = [i/3 for i in x]
-...     z = [i/3 for i in y]
-...     MEMPOINT("with x, y, z")
-...     del x
-...     MEMPOINT("without x")
-...     del y
-...     MEMPOINT("without x and y")
-...     del z
-...     MEMPOINT("without x and y and z")
-...     return 
->>> _ = bar(100_000)
->>> MEMLOGS[-3].memory > MEMLOGS[-2].memory > MEMLOGS[-1].memory
-True
-
-```
-
-### Print `MEMLOGS`
-
-You can do whatever you want with `MEMLOGS`. However, when you want to see this object nicely printed, use the `MEMPRINT()` function, available from the global scope, too. You will see the results printed in a pretty way, with memory provided in MB.
-
-### Why the global scope?
-
-Since this feature of `perftester` is to be used to debug memory use from various modules, it'd be inconvinient to import the required objects in all these modules. That's why for the moment, the required objects are kept in the global scope — but this can change in future versions.
-
-If you have any comments about this, please share them via Issues of the package's repository.
-
 ## Other tools
 
 Of course, Python comes with various powerful tools for profiling, benchmarking and testing. Here are some of them:
@@ -518,6 +424,12 @@ In fact, `perftester` is just a simple wrapper around `timeit` and `memory_profi
 The default behavior of `perftester` is to **not** include the full traceback when a test does not pass. This is because when running performance tests, you're not interested in finding bugs, and this is what traceback is for. Instead, you want to see which test did not pass and how.
 
 > This behavior will not affect any other function than the two `perftester` testing functions: `pt.time_test()` and `pt.memory_usage_test()`. If you want to use this behavior for other functions, too, you can use `pt.config.cut_traceback()`; to reverse, use `pt.config.full_traceback()`.
+
+## Tracing full memory usage → Moved to `tracemem`
+
+Since the `0.5.*` versions, `perftester` contained a beta version of a memory tracer that could be used to trace full memory usage of a Python session.
+
+Since `perftester` requires some memory to load, it over-measured session memory. In order to avoid this, this feature was moved to a separate Python package, called `tracemem`. You can install it from [PyPi](https://pypi.org/project/tracemem/), and you will find its Git repository [here](https://github.com/nyggus/tracemem).
 
 ## Caveats
 
