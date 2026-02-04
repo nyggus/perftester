@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "perftester"
+version = "0.8.0"
+authors = [
+        { name = "Nyggus", email = "nyggus@gmail.com" },
+]
+description = "Lightweight performance testing in Python"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = ["easycheck", "rounder", "memory_profiler"]
+classifiers = [
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Operating System :: OS Independent",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/nyggus/perftester/"
+
+[tool.setuptools]
+packages = ["perftester"]
+
+[project.optional-dependencies]
+dev = ["wheel", "black", "pytest", "mypy", "setuptools", "build"]
+
+[tool.black]
+line-length = 79
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "perftester", "docs"]
+addopts = '--doctest-modules --doctest-glob="*.md"'
+doctest_optionflags = [
+    "ELLIPSIS",
+    "NORMALIZE_WHITESPACE",
+    "IGNORE_EXCEPTION_DETAIL"
+]
